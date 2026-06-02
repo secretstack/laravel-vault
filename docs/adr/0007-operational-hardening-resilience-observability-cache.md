@@ -1,0 +1,8 @@
+# Operational hardening: no circuit breaker, logs+events observability, cache encryption as defense-in-depth
+
+**Context:** The requirements asked for a circuit breaker, observability, and secure caching. Examined against the actual runtime model (secrets fetched once at worker boot; zero runtime Vault traffic), some of these need adjusting.
+
+**Decisions:**
+1. **No circuit breaker.** A breaker needs a stream of calls and persistent state to trip; the Vault call is a one-shot at worker boot with per-process state that resets every cold start. A per-boot breaker is just the retry budget in disguise. Resilience primitive instead: **bounded retries (3) + exponential backoff + jitter + hard per-attempt timeout (5s) + a total deadline.**
+2. **Observability without a hard metrics dependency.** The package emits structured PSR-3 logs to a dedicated `vault` channel (event names only, never values: `login.ok|fail`, `fetch.ok|fail`, `cache.hit|miss`, `cache.stale_served`, `denylist.hit`, `inject.count`) and dispatches Laravel events (`SecretsFetched`, `SecretsServedStale`, `VaultUnreachable`) for services/SRE to subscribe to. Sentry report on cold-fail, breadcrumb on stale-served. No baked-in Prometheus client (PHP-FPM has no cross-request registry; version-coupling 30 services is a liability).
+3. **Cache encryption is defense-in-depth, not a pod-compromise control.** Keep `APP_KEY` encryption + `0600`/`0700` perms; document honestly that an attacker with pod filesystem access usually also has `APP_KEY`. It protects against accidental exposure (log bundles, image layers, backups, `kubectl cp`). Mount the cache dir as a memory-backed `emptyDir` (tmpfs) so secrets never touch node disk.
