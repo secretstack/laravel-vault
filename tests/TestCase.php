@@ -2,18 +2,22 @@
 
 namespace Ibid\Vault\Tests;
 
+use Ibid\Vault\VaultServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
 {
     /**
-     * Package providers under test.
-     * VaultServiceProvider is wired here once it exists (Cycle 9).
-     *
      * @return array<int, class-string>
      */
     protected function getPackageProviders($app): array
     {
-        return [];
+        return [VaultServiceProvider::class];
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        // A valid 32-byte APP_KEY so the encrypted cache can be built.
+        $app['config']->set('app.key', 'base64:' . base64_encode(str_repeat('a', 32)));
     }
 }
