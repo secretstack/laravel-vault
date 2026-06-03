@@ -42,4 +42,20 @@ class InstallCommandTest extends TestCase
             'hook must be inserted exactly once',
         );
     }
+
+    public function test_fails_when_bootstrap_file_is_missing(): void
+    {
+        $this->artisan('vault:install', ['--path' => '/nonexistent/bootstrap-app.php'])
+            ->assertExitCode(1);
+    }
+
+    public function test_prints_manual_instructions_for_laravel_11_skeleton(): void
+    {
+        // L11 slim skeleton has no `return $app;` to anchor on.
+        file_put_contents($this->fixture, "<?php\n\nreturn Application::configure(basePath: dirname(__DIR__))->create();\n");
+
+        $this->artisan('vault:install', ['--path' => $this->fixture])->assertExitCode(1);
+
+        $this->assertStringNotContainsString('VaultBootstrap::inject', (string) file_get_contents($this->fixture));
+    }
 }

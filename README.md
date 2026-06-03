@@ -8,8 +8,9 @@ consumers **transparently** — adopt it with one line of code.
 - **Decisions:** [docs/adr/](./docs/adr/) (ADR-0001…0010)
 - **Glossary:** [CONTEXT.md](./CONTEXT.md)
 
-> Status: **design locked, implementation pending.** This repo currently holds the
-> blueprint; `src/` is scaffolded next.
+> Status: **v1 implemented (TDD).** 50 tests green, ~87% line coverage on `src/`
+> (PHP 8.2 / Laravel 11 / PHPUnit 11). See [DESIGN.md](./DESIGN.md) for the
+> architecture and [docs/adr/](./docs/adr/) for the decisions.
 
 ## Requirements
 

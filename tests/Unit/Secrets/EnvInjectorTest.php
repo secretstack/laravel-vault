@@ -39,4 +39,12 @@ class EnvInjectorTest extends TestCase
         $this->assertSame(['DB_PASSWORD'], $injected, 'only non-bootstrap keys are injected');
         $this->assertFalse(getenv('VAULT_FOO_TEST'), 'VAULT_* must never be injected');
     }
+
+    public function test_skips_non_string_values(): void
+    {
+        /** @phpstan-ignore-next-line intentional bad type to exercise the guard */
+        $injected = (new EnvInjector(new NullLogger()))->inject(['IBID_TEST_FOO' => 'ok', 'IBID_BAD' => 123]);
+
+        $this->assertSame(['IBID_TEST_FOO'], $injected, 'non-string values are skipped');
+    }
 }
