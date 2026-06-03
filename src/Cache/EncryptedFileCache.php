@@ -2,6 +2,7 @@
 
 namespace Ibid\Vault\Cache;
 
+use Ibid\Vault\Contracts\SecretCache;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Psr\Log\LoggerInterface;
@@ -14,7 +15,7 @@ use Psr\Log\LoggerInterface;
  * returns the last-known-good payload even past TTL, for the grace path
  * (ADR-0004). Both return null on a missing, malformed, or tampered file.
  */
-final class EncryptedFileCache
+final class EncryptedFileCache implements SecretCache
 {
     private const CACHE_FILE = 'secrets.cache';
 
