@@ -21,6 +21,100 @@ The *decisions* and their rationale live in Architecture Decision Records (ADR-0
 
 ---
 
+## 1.1 Why this package — DX & security
+
+Why a *package*, and not "each team integrates Vault themselves" or "keep the `.env` model"? Two axes: developer experience and security. The short version: **the hard parts of doing this correctly are subtle, identical across all 30 services, and dangerous to get wrong — so they should be solved once, centrally, and tested once.**
+
+### 1.1.1 Developer experience (DX)
+
+**The cost of NOT having a package.** A correct integration is not trivial code. The stockv2 pilot is ~13 files of *bootstrap-lifecycle-sensitive* logic: a facade-free loader that must run between `LoadEnvironmentVariables` and `LoadConfiguration`, raw-Guzzle auth with retry/backoff/jitter, an `APP_KEY`-encrypted cache, Octane-safe (no-static) state handling, a deny-list, and fail-closed/grace semantics. Hand-rolling that in 30 services means:
+
+- **30× the bug surface.** A flaw in the boot timing, the cache, or the Octane state model is re-derived (and re-broken) 30 different ways.
+- **30× the maintenance.** When we fix the deny-list (ADR-0005) or the grace path (ADR-0004), we'd have to patch 30 repos by hand. With a package, it's one `composer update`.
+- **Drift.** "Works on stockv2, breaks on serviceX" because each team implemented it slightly differently. No two `.env`-handling shims would be identical.
+
+**What the package gives a consuming team instead:**
+
+| DX property | How |
+|---|---|
+| **Near plug-and-play onboarding** | `composer require` + `php artisan vault:install` (auto-patches `bootstrap/app.php`) + bootstrap-tier `.env`. No Vault internals to learn. |
+| **Zero application refactor** | Existing `config('database.password')` / `env('JWT_SECRET')` calls are unchanged — transparent injection (ADR-0002). Teams don't rewrite a single consumer. |
+| **One mental model, fleet-wide** | Same `vault:check` / `vault:refresh` / `vault:install` commands and the same failure semantics on every service. On-call learns it once. |
+| **Fast, safe local loop** | Composer *path repository* (§2.2) symlinks the package for instant iteration; `VAULT_ENABLED=false` makes it a no-op for local dev. |
+| **Clear failure diagnostics** | `vault:check` prints auth/read/cache/inject status with masked values, instead of an opaque "DB connection refused" three layers deep. |
+| **Centralized upgrades** | Bug fixes and hardening ship as a version bump behind a frozen consumer surface (§13) — internals improve without touching 30 `bootstrap/app.php` files. |
+
+### 1.1.2 Security
+
+**What the `.env`-baked model costs us today** (see §1.5.1 for the flow):
+
+- **Plaintext sprawl.** Every secret for every service sits in plaintext in the `Ibid_Env` repo. Repo read access = the entire fleet's secrets.
+- **Secrets in every image layer.** `COPY .env` bakes the full secret set into images. Anyone who can pull an image extracts everything.
+- **No audit.** Nothing records who read which secret, when. Incident forensics is blind.
+- **Rotation is so expensive it doesn't happen.** Rotating a secret means editing the config repo and rebuilding + redeploying the image. Because it's painful, secrets are long-lived — the single biggest real-world risk amplifier.
+
+**What the package changes:**
+
+| Security property | Before (`.env`) | With the package |
+|---|---|---|
+| **Single source of truth** | 30 scattered `.env` files | one Vault path per service/env, access-controlled |
+| **Secrets in config repo** | all, plaintext | none (bootstrap-tier only) |
+| **Secrets in image layers** | all | only secret-zero + `APP_KEY` (accepted, ADR-0008) |
+| **Audit trail** | none | Vault audit device — every read logged (ADR-0009) |
+| **Rotation** | repo edit + rebuild + redeploy | update Vault + rolling restart — cheap enough to *actually do* |
+| **Least privilege** | n/a | per-env AppRole, path-scoped policy (ADR-0009) |
+| **Blast radius of an image leak** | that service's secrets | contained to one environment (ADR-0009) |
+| **Wrong/empty creds on outage** | n/a | fail-closed — refuses to serve rather than run on null secrets (ADR-0003) |
+| **Bootstrap-key poisoning** | n/a | deny-list blocks `APP_KEY`/`VAULT_*` injection (ADR-0005) |
+| **Secrets in logs** | ad-hoc | contract: event/key names only, never values (ADR-0007) |
+| **Standardization** | 30 bespoke handlings of varying quality | one audited, reviewed implementation everywhere |
+
+**Honest limits (so this isn't oversold).** The package does **not** make a fully-compromised pod safe — an attacker with `APP_KEY` and filesystem access can decrypt the cache and read injected env (inherent to in-app injection). And `VAULT_SECRET_ID` is still baked into the image in v1 (ADR-0008). It materially *shrinks* the attack surface and *enables* practices that were previously impractical (rotation, audit, least-privilege); the remaining gaps have a documented exit path (Workload Identity, §19). This is a large step forward, not a finish line.
+
+---
+
+## 1.2 Pros & cons (the trade-off, stated plainly)
+
+§1.1 makes the case *for*. This section is the balanced ledger — what you gain, and what you are **signing up to operate**. Adopting this package is a real trade, not a free win.
+
+### Pros (summary — detail in §1.1)
+
+- **Secrets centralized and access-controlled** in Vault; out of the config repo and (mostly) out of image layers.
+- **Audit trail** of every secret read (ADR-0009).
+- **Cheap rotation** — update Vault + rolling restart, no rebuild — which is what finally makes rotation *happen*.
+- **Least privilege** per environment (ADR-0009).
+- **Zero application refactor** — existing `config()`/`env()` calls are unchanged (ADR-0002).
+- **One-command onboarding** and **fleet-wide consistency** — one tested implementation, not 30 bespoke ones.
+- **Centralized fixes** behind a frozen consumer surface (§13).
+- **Safe-by-default runtime** — Octane-safe (immutable-per-worker), fail-closed, stale-grace, zero per-request cost.
+
+### Cons / trade-offs you are signing up for
+
+| Trade-off | Why it exists | Mitigation / ref |
+|---|---|---|
+| **A new boot-time critical dependency** | Pods now need Vault reachable at cold start; before, the baked `.env` was always present. A Vault outage during a deploy halts that rollout. | Fail-closed keeps old pods serving; stale-grace covers warm pods; Vault-up-during-deploy is an accepted constraint (ADR-0003) |
+| **Operational surface grows** | DevOps must provision and run Vault auth: AppRole creds, per-env policies, audit, rotation. More to understand and maintain. | One-time per service/env; standardized checklist (§17) |
+| **Secret-zero not eliminated** | `VAULT_SECRET_ID` + `APP_KEY` are still baked into the image in v1. | Accepted risk + compensating controls; documented exit path (ADR-0008, §19) |
+| **Rotation needs a restart** | Secrets are immutable for a worker's life (the thing that makes it Octane-safe). No hot reload. | Rolling restart; piggybacks on normal deploys (Q5). Dynamic secrets are out of scope (v1) |
+| **A bad package version can stop pods booting** | It's bootstrap-tier, not runtime — a throwing loader = pods won't start. | Strict `^1.0` pinning + canary-first rollout + the `run.sh` gate (§13, ADR-0010) |
+| **Added boot latency** | One AppRole login + KV read per cold pod (~50–200ms); deploy storms add Vault load. | One-shot per pod, cached after; jitter to avoid stampede (§15) |
+| **Weaker test loop than ideal** | CI is network-locked, so the package can't be integration-tested against a real Vault in CI. | Mocked unit tests + `run.sh --gate` at deploy + manual staging smoke (§14) |
+| **A new operational rule to enforce** | `config:cache` must run at *startup-after-injection*, never at build time, or values silently go null. | Shipped startup sequence + `vault:install` verification (ADR-0005) |
+| **Cache encryption is not a strong control** | Defense-in-depth only; a fully-compromised pod (has `APP_KEY` + fs) can still read secrets. | Inherent to in-app injection; Workload-Identity roadmap (§19) |
+| **Coordinated fleet migration** | 30 services need provisioning, `.env` slimming, and canary waves. | Phased runbook (§17) |
+
+### When the trade-off may *not* be worth it
+
+- A service with **no real secrets** (only public URLs/flags) — the new dependency buys little. Leave it on `.env`, or set `VAULT_ENABLED=false`.
+- A throwaway/spike service with a short lifespan.
+- A service whose production target **cannot tolerate a boot-time Vault dependency** *and* cannot run the `run.sh` gate — revisit fail-open posture first.
+
+### Net assessment
+
+For a revenue-critical, long-lived service holding real credentials (i.e. most of the fleet), the trade is **clearly worth it**: you exchange "secrets sprawled in plaintext, never rotated, unauditable" for "centralized, audited, rotatable secrets" at the cost of a managed boot-time dependency and upgrade discipline — both of which are addressed by the safety mechanisms above. The cons are real and must be operated, not hand-waved; none of them outweighs the security posture change for services that actually hold secrets.
+
+---
+
 ## 1.5 How it works: existing (`.env`) vs new (Vault)
 
 This is the heart of "what changes." The mechanism by which `config('db.password')` gets its value is *almost identical* in both — the difference is **where the value comes from and where it is exposed.**
