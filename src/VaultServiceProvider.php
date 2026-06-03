@@ -96,6 +96,14 @@ final class VaultServiceProvider extends ServiceProvider
     {
         $this->publishes([__DIR__ . '/../config/vault.php' => $this->app->configPath('vault.php')], 'vault-config');
 
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \Ibid\Vault\Console\CheckCommand::class,
+                \Ibid\Vault\Console\RefreshCommand::class,
+                \Ibid\Vault\Console\InstallCommand::class,
+            ]);
+        }
+
         $this->applyKeyMapOverrides();
     }
 
