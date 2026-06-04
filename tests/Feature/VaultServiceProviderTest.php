@@ -15,6 +15,18 @@ use Ibid\Vault\Tests\TestCase;
 
 class VaultServiceProviderTest extends TestCase
 {
+    protected function defineEnvironment($app): void
+    {
+        parent::defineEnvironment($app);
+
+        // Resolving the real graph runs the Factory's assertUsable guard, so the
+        // binding test needs a complete config (the realistic precondition for
+        // anything resolving the provider).
+        $app['config']->set('vault.auth.role_id', 'rid');
+        $app['config']->set('vault.auth.secret_id', 'sid');
+        $app['config']->set('vault.secret_path', 'ibid/data/ims/dev/svc');
+    }
+
     public function test_merges_vault_config(): void
     {
         $config = config('vault');

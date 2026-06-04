@@ -30,6 +30,7 @@ return [
         'timeout'     => (int) env('VAULT_HTTP_TIMEOUT', 5),
         'retries'     => (int) env('VAULT_HTTP_RETRIES', 3),
         'retry_delay' => 500,
+        'max_delay'   => 5000,
         'verify'      => env('VAULT_TLS_VERIFY', true),
     ],
 

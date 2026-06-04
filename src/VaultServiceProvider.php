@@ -2,17 +2,13 @@
 
 namespace Ibid\Vault;
 
-use GuzzleHttp\Client as GuzzleClient;
-use Ibid\Vault\Auth\AppRoleAuth;
-use Ibid\Vault\Cache\EncryptedFileCache;
+use Ibid\Vault\Config\VaultConfig;
 use Ibid\Vault\Contracts\AuthMethod;
 use Ibid\Vault\Contracts\SecretCache;
 use Ibid\Vault\Contracts\SecretProvider;
 use Ibid\Vault\Contracts\VaultClient;
-use Ibid\Vault\Http\GuzzleVaultClient;
-use Ibid\Vault\Provider\VaultSecretProvider;
+use Ibid\Vault\Factory\VaultFactory;
 use Ibid\Vault\Secrets\SecretStore;
-use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
@@ -40,54 +36,34 @@ final class VaultServiceProvider extends ServiceProvider
             ]);
         }
 
-        $this->app->singleton(VaultClient::class, function ($app): VaultClient {
-            $cfg     = $app['config']->get('vault');
-            $retries = max(1, (int) $cfg['http']['retries']);
+        // Resolved config + the assembler are bound once; every collaborator
+        // below is wired through the Factory so the wiring lives in one place
+        // (shared with the facade-free Loader). APP_KEY lives under app.*, not
+        // vault.*, so it is threaded in separately.
+        $this->app->singleton(VaultConfig::class, fn ($app): VaultConfig => VaultConfig::fromArray(
+            $app['config']->get('vault'),
+            (string) $app['config']->get('app.key'),
+        ));
 
-            return new GuzzleVaultClient(
-                http: new GuzzleClient([
-                    'timeout'     => $cfg['http']['timeout'],
-                    'verify'      => $cfg['http']['verify'],
-                    'http_errors' => false,
-                ]),
-                address:     $cfg['address'],
-                namespace:   $cfg['namespace'],
-                maxRetries:  $retries,
-                baseDelayMs: (int) $cfg['http']['retry_delay'],
-                maxDelayMs:  5000,
-                deadlineMs:  (int) $cfg['http']['timeout'] * $retries * 1000,
-                logger:      Log::channel('vault'),
-            );
-        });
+        $this->app->singleton(VaultFactory::class, fn (): VaultFactory => new VaultFactory());
 
-        $this->app->singleton(AuthMethod::class, function ($app): AuthMethod {
-            $cfg = $app['config']->get('vault');
+        $this->app->singleton(VaultClient::class, fn ($app): VaultClient => $app->make(VaultFactory::class)
+            ->makeClient($app->make(VaultConfig::class), Log::channel('vault')));
 
-            return new AppRoleAuth($cfg['auth']['role_id'], $cfg['auth']['secret_id'], $cfg['auth']['mount']);
-        });
+        $this->app->singleton(AuthMethod::class, fn ($app): AuthMethod => $app->make(VaultFactory::class)
+            ->makeAuth($app->make(VaultConfig::class)));
 
-        $this->app->singleton(SecretCache::class, function ($app): SecretCache {
-            return new EncryptedFileCache(
-                $this->buildEncrypter((string) $app['config']->get('app.key')),
-                $app['config']->get('vault.cache.path'),
+        $this->app->singleton(SecretCache::class, fn ($app): SecretCache => $app->make(VaultFactory::class)
+            ->makeCache($app->make(VaultConfig::class), Log::channel('vault')));
+
+        $this->app->singleton(SecretProvider::class, fn ($app): SecretProvider => $app->make(VaultFactory::class)
+            ->makeProvider(
+                $app->make(VaultClient::class),
+                $app->make(AuthMethod::class),
+                $app->make(SecretCache::class),
+                $app->make(VaultConfig::class),
                 Log::channel('vault'),
-            );
-        });
-
-        $this->app->singleton(SecretProvider::class, function ($app): SecretProvider {
-            $cfg = $app['config']->get('vault');
-
-            return new VaultSecretProvider(
-                client:       $app->make(VaultClient::class),
-                auth:         $app->make(AuthMethod::class),
-                cache:        $app->make(SecretCache::class),
-                secretPath:   $cfg['secret_path'],
-                cacheTtl:     (int) $cfg['cache']['ttl'],
-                cacheSkew:    (int) $cfg['cache']['skew'],
-                cacheEnabled: (bool) $cfg['cache']['enabled'],
-                logger:       Log::channel('vault'),
-            );
-        });
+            ));
 
         $this->app->singleton(SecretStore::class, fn ($app): SecretStore => new SecretStore($app->make(SecretProvider::class)));
     }
@@ -135,14 +111,5 @@ final class VaultServiceProvider extends ServiceProvider
                 throw $e;
             }
         }
-    }
-
-    private function buildEncrypter(string $appKey): Encrypter
-    {
-        if (str_starts_with($appKey, 'base64:')) {
-            $appKey = (string) base64_decode(substr($appKey, 7), true);
-        }
-
-        return new Encrypter($appKey, 'AES-256-CBC');
     }
 }
