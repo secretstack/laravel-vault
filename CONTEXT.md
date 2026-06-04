@@ -19,6 +19,14 @@ _Avoid_: "config override" (that's the narrower `key_map` backstop, not the prim
 **The Loader**:
 The facade-free bootstrap component (`VaultBootstrap::inject($app)`) invoked from a single `afterBootstrapping(LoadEnvironmentVariables)` line in a consumer's `bootstrap/app.php`. Runs before facades exist.
 
+**Resolved config** (`VaultConfig`):
+The typed, validated projection of `config/vault.php` that both the **Loader** (`fromEnv()`, reading raw env at boot) and the `VaultServiceProvider` (`fromArray()`, reading `config('vault')` at runtime) build. Casts, defaults, and the completeness check (`assertUsable()`) live here, not smeared across the two boot phases.
+_Avoid_: conflating with `config/vault.php` itself — that is the raw Laravel config array; `VaultConfig` is its typed, validated projection.
+
+**The Factory** (`VaultFactory`):
+The in-process assembler that wires the secret-fetching graph (client → auth → cache → provider → store) from a **Resolved config**. The magic constants — max backoff, AES cipher, the retry deadline formula, the `base64:`-strip and empty-`APP_KEY` guard — live here and nowhere else. Both the **Loader** and the `VaultServiceProvider` build through it; they differ only in config source and logger.
+_Avoid_: "the builder" / "the bindings" — the ServiceProvider's container bindings delegate to **The Factory**; they are not themselves the assembler.
+
 **Provider** (`SecretProvider`):
 The single-method contract (`fetch(): array<string,string>`) abstracting the secret source. One implementation exists: `VaultSecretProvider`. Vault-isms (lease, KV-v2 version, AppRole) live inside it, never in the contract.
 
@@ -41,6 +49,7 @@ Boot behavior when secrets cannot be obtained. **Fail-closed** (production defau
 ## Relationships
 
 - A **Service** has one Vault **path** per **environment**; one **secret-zero** is shared by all services *within* an environment (not per-service).
+- The **Loader** and the `VaultServiceProvider` each build a **Resolved config** and pass it to **The Factory**, which assembles the graph the **Provider** drives — so wiring knowledge lives in one place across both boot phases.
 - The **Loader** calls the **Provider**, which returns secrets that are then **transparently injected**.
 - **Cold start** → fail-closed; **Refresh** failure → **grace**. The **Gate** enforces the same distinction at startup.
 - **Bootstrap-tier keys** are inputs to the Loader and are never outputs of the **Provider**.
