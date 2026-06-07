@@ -1,6 +1,6 @@
 <?php
 
-namespace Ibid\Vault\DTO;
+namespace Vaultenv\Vault\DTO;
 
 /**
  * A Vault auth token as returned by an AppRole login.

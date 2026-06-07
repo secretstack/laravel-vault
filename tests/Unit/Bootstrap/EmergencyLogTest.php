@@ -1,8 +1,8 @@
 <?php
 
-namespace Ibid\Vault\Tests\Unit\Bootstrap;
+namespace Vaultenv\Vault\Tests\Unit\Bootstrap;
 
-use Ibid\Vault\Bootstrap\VaultBootstrap;
+use Vaultenv\Vault\Bootstrap\VaultBootstrap;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use RuntimeException;

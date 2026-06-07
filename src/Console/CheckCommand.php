@@ -1,9 +1,9 @@
 <?php
 
-namespace Ibid\Vault\Console;
+namespace Vaultenv\Vault\Console;
 
-use Ibid\Vault\Contracts\SecretCache;
-use Ibid\Vault\Secrets\SecretStore;
+use Vaultenv\Vault\Contracts\SecretCache;
+use Vaultenv\Vault\Secrets\SecretStore;
 use Illuminate\Console\Command;
 
 /**

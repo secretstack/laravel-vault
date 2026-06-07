@@ -1,11 +1,11 @@
-# ibid/laravel-vault
+# vaultenv/laravel-vault
 
-Private Laravel package: centralized HashiCorp Vault secret management for the IBID fleet
+Private Laravel package: centralized HashiCorp Vault secret management for the fleet
 (30+ services). Fetches a service's secrets from Vault at boot and injects them so existing
 `env()`/`config()` consumers work **unchanged**.
 
 **Read before changing anything:** `DESIGN.md` (build blueprint), `docs/adr/` (decisions
-0001–0010), `CONTEXT.md` (glossary). Do not contradict an ADR without recording a
+0001–0011), `CONTEXT.md` (glossary). Do not contradict an ADR without recording a
 superseding one.
 
 ## Stack & compatibility
@@ -49,4 +49,4 @@ docker exec -i -w /var/www/html/ibid/laravel-vault php8.2 php -l <file>
    version, AppRole) leak through the contract (ADR-0006).
 
 ## Namespace
-PSR-4 `Ibid\Vault\` → `src/`. Facade alias `Vault`. Config key `vault`.
+PSR-4 `Vaultenv\Vault\` → `src/`. Facade alias `Vault`. Config key `vault`.

@@ -1,9 +1,9 @@
 <?php
 
-namespace Ibid\Vault\Tests\Unit\Secrets;
+namespace Vaultenv\Vault\Tests\Unit\Secrets;
 
-use Ibid\Vault\Contracts\SecretProvider;
-use Ibid\Vault\Secrets\SecretStore;
+use Vaultenv\Vault\Contracts\SecretProvider;
+use Vaultenv\Vault\Secrets\SecretStore;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 

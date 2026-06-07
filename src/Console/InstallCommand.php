@@ -1,6 +1,6 @@
 <?php
 
-namespace Ibid\Vault\Console;
+namespace Vaultenv\Vault\Console;
 
 use Illuminate\Console\Command;
 
@@ -57,7 +57,7 @@ final class InstallCommand extends Command
         return <<<'PHP'
 $app->afterBootstrapping(
     \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables::class,
-    fn ($app) => \Ibid\Vault\Bootstrap\VaultBootstrap::inject($app)
+    fn ($app) => \Vaultenv\Vault\Bootstrap\VaultBootstrap::inject($app)
 );
 PHP;
     }

@@ -1,13 +1,13 @@
 <?php
 
-namespace Ibid\Vault\Http;
+namespace Vaultenv\Vault\Http;
 
 use Closure;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Ibid\Vault\Contracts\VaultClient;
-use Ibid\Vault\DTO\VaultSecret;
-use Ibid\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\Contracts\VaultClient;
+use Vaultenv\Vault\DTO\VaultSecret;
+use Vaultenv\Vault\Exceptions\VaultException;
 use Psr\Log\LoggerInterface;
 
 /**

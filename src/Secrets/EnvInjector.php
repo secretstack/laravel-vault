@@ -1,6 +1,6 @@
 <?php
 
-namespace Ibid\Vault\Secrets;
+namespace Vaultenv\Vault\Secrets;
 
 use Psr\Log\LoggerInterface;
 

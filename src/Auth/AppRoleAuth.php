@@ -1,11 +1,11 @@
 <?php
 
-namespace Ibid\Vault\Auth;
+namespace Vaultenv\Vault\Auth;
 
-use Ibid\Vault\Contracts\AuthMethod;
-use Ibid\Vault\Contracts\VaultClient;
-use Ibid\Vault\DTO\VaultToken;
-use Ibid\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\Contracts\AuthMethod;
+use Vaultenv\Vault\Contracts\VaultClient;
+use Vaultenv\Vault\DTO\VaultToken;
+use Vaultenv\Vault\Exceptions\VaultException;
 
 /**
  * AppRole authentication: exchanges a role_id + secret_id for a client token.

@@ -1,19 +1,20 @@
 <?php
 
-namespace Ibid\Vault\Factory;
+namespace Vaultenv\Vault\Factory;
 
 use GuzzleHttp\Client as GuzzleClient;
-use Ibid\Vault\Auth\AppRoleAuth;
-use Ibid\Vault\Cache\EncryptedFileCache;
-use Ibid\Vault\Config\VaultConfig;
-use Ibid\Vault\Contracts\AuthMethod;
-use Ibid\Vault\Contracts\SecretCache;
-use Ibid\Vault\Contracts\SecretProvider;
-use Ibid\Vault\Contracts\VaultClient;
-use Ibid\Vault\Exceptions\VaultException;
-use Ibid\Vault\Http\GuzzleVaultClient;
-use Ibid\Vault\Provider\VaultSecretProvider;
-use Ibid\Vault\Secrets\SecretStore;
+use Vaultenv\Vault\Auth\AppRoleAuth;
+use Vaultenv\Vault\Cache\EncryptedFileCache;
+use Vaultenv\Vault\Cache\NullCache;
+use Vaultenv\Vault\Config\VaultConfig;
+use Vaultenv\Vault\Contracts\AuthMethod;
+use Vaultenv\Vault\Contracts\SecretCache;
+use Vaultenv\Vault\Contracts\SecretProvider;
+use Vaultenv\Vault\Contracts\VaultClient;
+use Vaultenv\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\Http\GuzzleVaultClient;
+use Vaultenv\Vault\Provider\VaultSecretProvider;
+use Vaultenv\Vault\Secrets\SecretStore;
 use Illuminate\Encryption\Encrypter;
 use Psr\Log\LoggerInterface;
 
@@ -55,6 +56,10 @@ final class VaultFactory
 
     public function makeCache(VaultConfig $c, LoggerInterface $logger): SecretCache
     {
+        if (! $c->cacheEnabled) {
+            return new NullCache($logger);
+        }
+
         return new EncryptedFileCache($this->buildEncrypter($c), $c->cachePath, $logger);
     }
 
@@ -68,14 +73,13 @@ final class VaultFactory
         $c->assertUsable();
 
         return new VaultSecretProvider(
-            client:       $client,
-            auth:         $auth,
-            cache:        $cache,
-            secretPath:   $c->secretPath,
-            cacheTtl:     $c->cacheTtl,
-            cacheSkew:    $c->cacheSkew,
-            cacheEnabled: $c->cacheEnabled,
-            logger:       $logger,
+            client:     $client,
+            auth:       $auth,
+            cache:      $cache,
+            secretPath: $c->secretPath,
+            cacheTtl:   $c->cacheTtl,
+            cacheSkew:  $c->cacheSkew,
+            logger:     $logger,
         );
     }
 

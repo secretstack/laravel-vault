@@ -1,8 +1,8 @@
 <?php
 
-namespace Ibid\Vault\Facades;
+namespace Vaultenv\Vault\Facades;
 
-use Ibid\Vault\Secrets\SecretStore;
+use Vaultenv\Vault\Secrets\SecretStore;
 use Illuminate\Support\Facades\Facade;
 
 /**

@@ -1,8 +1,8 @@
 <?php
 
-namespace Ibid\Vault\Config;
+namespace Vaultenv\Vault\Config;
 
-use Ibid\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\Exceptions\VaultException;
 use Illuminate\Support\Env;
 
 /**

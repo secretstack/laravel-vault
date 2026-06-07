@@ -1,9 +1,10 @@
 <?php
 
-namespace Ibid\Vault\Console;
+namespace Vaultenv\Vault\Console;
 
-use Ibid\Vault\Contracts\SecretCache;
-use Ibid\Vault\Secrets\SecretStore;
+use Vaultenv\Vault\Config\VaultConfig;
+use Vaultenv\Vault\Contracts\SecretCache;
+use Vaultenv\Vault\Secrets\SecretStore;
 use Illuminate\Console\Command;
 
 /**
@@ -16,8 +17,12 @@ final class RefreshCommand extends Command
 
     protected $description = 'Clear the Vault secret cache and re-fetch from Vault';
 
-    public function handle(SecretCache $cache, SecretStore $store): int
+    public function handle(SecretCache $cache, SecretStore $store, VaultConfig $config): int
     {
+        if (! $config->cacheEnabled) {
+            $this->warn('Cache is disabled; secrets will be re-fetched from Vault but not persisted.');
+        }
+
         $this->info('Clearing Vault secret cache…');
         $cache->forget();
 

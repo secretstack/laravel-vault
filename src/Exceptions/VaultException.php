@@ -1,6 +1,6 @@
 <?php
 
-namespace Ibid\Vault\Exceptions;
+namespace Vaultenv\Vault\Exceptions;
 
 /**
  * A HashiCorp Vault-specific failure (auth, HTTP, or malformed response).

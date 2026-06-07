@@ -1,6 +1,6 @@
 <?php
 
-namespace Ibid\Vault\DTO;
+namespace Vaultenv\Vault\DTO;
 
 /**
  * A secret read from a KV-v2 path.

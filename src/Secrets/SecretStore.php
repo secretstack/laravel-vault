@@ -1,8 +1,8 @@
 <?php
 
-namespace Ibid\Vault\Secrets;
+namespace Vaultenv\Vault\Secrets;
 
-use Ibid\Vault\Contracts\SecretProvider;
+use Vaultenv\Vault\Contracts\SecretProvider;
 
 /**
  * Per-worker, write-once in-memory holder of resolved secrets.

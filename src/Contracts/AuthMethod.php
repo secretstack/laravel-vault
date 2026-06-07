@@ -1,9 +1,9 @@
 <?php
 
-namespace Ibid\Vault\Contracts;
+namespace Vaultenv\Vault\Contracts;
 
-use Ibid\Vault\DTO\VaultToken;
-use Ibid\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\DTO\VaultToken;
+use Vaultenv\Vault\Exceptions\VaultException;
 
 /**
  * A Vault authentication strategy. AppRole is the only implementation in v1;

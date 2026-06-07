@@ -1,8 +1,8 @@
 <?php
 
-namespace Ibid\Vault\Tests\Feature;
+namespace Vaultenv\Vault\Tests\Feature;
 
-use Ibid\Vault\Tests\TestCase;
+use Vaultenv\Vault\Tests\TestCase;
 
 class InstallCommandTest extends TestCase
 {

@@ -1,14 +1,14 @@
 <?php
 
-namespace Ibid\Vault;
+namespace Vaultenv\Vault;
 
-use Ibid\Vault\Config\VaultConfig;
-use Ibid\Vault\Contracts\AuthMethod;
-use Ibid\Vault\Contracts\SecretCache;
-use Ibid\Vault\Contracts\SecretProvider;
-use Ibid\Vault\Contracts\VaultClient;
-use Ibid\Vault\Factory\VaultFactory;
-use Ibid\Vault\Secrets\SecretStore;
+use Vaultenv\Vault\Config\VaultConfig;
+use Vaultenv\Vault\Contracts\AuthMethod;
+use Vaultenv\Vault\Contracts\SecretCache;
+use Vaultenv\Vault\Contracts\SecretProvider;
+use Vaultenv\Vault\Contracts\VaultClient;
+use Vaultenv\Vault\Factory\VaultFactory;
+use Vaultenv\Vault\Secrets\SecretStore;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
@@ -74,9 +74,9 @@ final class VaultServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
-                \Ibid\Vault\Console\CheckCommand::class,
-                \Ibid\Vault\Console\RefreshCommand::class,
-                \Ibid\Vault\Console\InstallCommand::class,
+                \Vaultenv\Vault\Console\CheckCommand::class,
+                \Vaultenv\Vault\Console\RefreshCommand::class,
+                \Vaultenv\Vault\Console\InstallCommand::class,
             ]);
         }
 

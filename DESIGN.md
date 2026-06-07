@@ -1,6 +1,6 @@
-# ibid/laravel-vault — Design Document
+# vaultenv/laravel-vault — Design Document
 
-> Centralized HashiCorp Vault secret management for the IBID Laravel fleet (30+ services).
+> Centralized HashiCorp Vault secret management for the Laravel fleet (30+ services).
 > Status: design locked across ADR-0001…0010. This document is the build blueprint.
 
 ---
@@ -215,8 +215,8 @@ A Composer package is just a folder with a `composer.json` that declares a **PSR
 
 ```jsonc
 {
-  "name": "ibid/laravel-vault",
-  "description": "Centralized HashiCorp Vault secret management for IBID Laravel services.",
+  "name": "vaultenv/laravel-vault",
+  "description": "Centralized HashiCorp Vault secret management for Laravel services.",
   "type": "library",
   "license": "proprietary",
   "require": {
@@ -230,12 +230,12 @@ A Composer package is just a folder with a `composer.json` that declares a **PSR
     "orchestra/testbench": "^7.0 || ^8.0 || ^9.0",
     "phpunit/phpunit": "^9.5 || ^10.0"
   },
-  "autoload":      { "psr-4": { "Ibid\\Vault\\":       "src/" } },
-  "autoload-dev":  { "psr-4": { "Ibid\\Vault\\Tests\\": "tests/" } },
+  "autoload":      { "psr-4": { "Vaultenv\\Vault\\":       "src/" } },
+  "autoload-dev":  { "psr-4": { "Vaultenv\\Vault\\Tests\\": "tests/" } },
   "extra": {
     "laravel": {
-      "providers": [ "Ibid\\Vault\\VaultServiceProvider" ],
-      "aliases":   { "Vault": "Ibid\\Vault\\Facades\\Vault" }
+      "providers": [ "Vaultenv\\Vault\\VaultServiceProvider" ],
+      "aliases":   { "Vault": "Vaultenv\\Vault\\Facades\\Vault" }
     }
   },
   "config": { "sort-packages": true },
@@ -255,17 +255,17 @@ While developing, point a consumer at your local folder. In `Ibid_ADMS_ServiceSt
 "repositories": [
   { "type": "path", "url": "../laravel-vault", "options": { "symlink": true } }
 ],
-"require": { "ibid/laravel-vault": "@dev" }
+"require": { "vaultenv/laravel-vault": "@dev" }
 ```
 
-Then inside the container: `composer require ibid/laravel-vault:@dev`. Because both folders are under `~/podman-volumes/www`, the container sees `../laravel-vault` and **symlinks** it — edit the package, the change is live in stockv2 instantly. This is the dev loop; you publish only when it's stable.
+Then inside the container: `composer require vaultenv/laravel-vault:@dev`. Because both folders are under `~/podman-volumes/www`, the container sees `../laravel-vault` and **symlinks** it — edit the package, the change is live in stockv2 instantly. This is the dev loop; you publish only when it's stable.
 
 ### 2.3 Publishing to private Packagist
 
-1. Push the package to its own git repo (e.g. `git@…/ibid/laravel-vault.git`).
+1. Push the package to its own git repo (e.g. `git@…/vaultenv/laravel-vault.git`).
 2. Submit the repo to your **private Packagist** (packagist.com) org.
 3. Each release is a **git tag** (`v1.0.0`) — Packagist exposes tags as installable versions.
-4. Consumers add the private Packagist repository to their `composer.json` and `composer require ibid/laravel-vault:^1.0`.
+4. Consumers add the private Packagist repository to their `composer.json` and `composer require vaultenv/laravel-vault:^1.0`.
 
 ### 2.4 Versioning is git tags
 
@@ -351,7 +351,7 @@ laravel-vault/
 ## 5. Contracts
 
 ```php
-namespace Ibid\Vault\Contracts;
+namespace Vaultenv\Vault\Contracts;
 
 interface SecretProvider
 {
@@ -361,8 +361,8 @@ interface SecretProvider
 
 interface VaultClient
 {
-    public function login(string $roleId, string $secretId): \Ibid\Vault\DTO\VaultToken;     // throws VaultException
-    public function readKvV2(string $path, string $clientToken): \Ibid\Vault\DTO\VaultSecret; // throws VaultException
+    public function login(string $roleId, string $secretId): \Vaultenv\Vault\DTO\VaultToken;     // throws VaultException
+    public function readKvV2(string $path, string $clientToken): \Vaultenv\Vault\DTO\VaultSecret; // throws VaultException
 }
 ```
 
@@ -566,7 +566,7 @@ The model is **immutable-per-worker** (ADR-0004 context, Q5): resolve once at wo
 - [ ] Per-env `SECRET_ID`; policy scoped to `ibid/data/+/<env>/*` (ADR-0009 — DevOps)
 - [ ] Vault audit device + anomaly alerting on (ADR-0009 — DevOps)
 - [ ] Chat-exposed dev `SECRET_ID` rotated (ADR-0008)
-- [ ] Consumer pins `ibid/laravel-vault:^1.0`
+- [ ] Consumer pins `vaultenv/laravel-vault:^1.0`
 - [ ] `vault` log channel wired; Sentry receiving cold-fail reports
 
 ---
@@ -577,7 +577,7 @@ The model is **immutable-per-worker** (ADR-0004 context, Q5): resolve once at wo
 1. DevOps: create Vault path `ibid/data/<service>/<env>`, path-scoped policy, bind to the per-env AppRole.
 2. Populate the path (bulk JSON in the Vault UI — the `.env → JSON` converter, excluding `VAULT_*` and `APP_KEY`).
 3. `Ibid_Env`: slim the service's `.env` to bootstrap-tier keys only.
-4. `composer require ibid/laravel-vault:^1.0`.
+4. `composer require vaultenv/laravel-vault:^1.0`.
 5. `php artisan vault:install` (patches `bootstrap/app.php`, prints diff).
 6. Add `vault:check --gate` to `run.sh`; ensure `config:cache` runs after it.
 7. Deploy to dev → confirm `vault:check` passes, app boots, one canary secret resolves.

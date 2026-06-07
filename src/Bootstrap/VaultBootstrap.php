@@ -1,12 +1,12 @@
 <?php
 
-namespace Ibid\Vault\Bootstrap;
+namespace Vaultenv\Vault\Bootstrap;
 
-use Ibid\Vault\Config\VaultConfig;
-use Ibid\Vault\Exceptions\VaultException;
-use Ibid\Vault\Factory\VaultFactory;
-use Ibid\Vault\Secrets\EnvInjector;
-use Ibid\Vault\Support\FileLogger;
+use Vaultenv\Vault\Config\VaultConfig;
+use Vaultenv\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\Factory\VaultFactory;
+use Vaultenv\Vault\Secrets\EnvInjector;
+use Vaultenv\Vault\Support\FileLogger;
 use Illuminate\Contracts\Foundation\Application;
 
 /**

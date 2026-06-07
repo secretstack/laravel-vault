@@ -1,6 +1,6 @@
-# ibid/laravel-vault
+# vaultenv/laravel-vault
 
-A private Laravel package that fetches a service's secrets from HashiCorp Vault at boot and makes them available to existing `env()`/`config()` consumers transparently, across the IBID fleet of 30+ services.
+A private Laravel package that fetches a service's secrets from HashiCorp Vault at boot and makes them available to existing `env()`/`config()` consumers transparently, across a fleet of 30+ services.
 
 ## Language
 

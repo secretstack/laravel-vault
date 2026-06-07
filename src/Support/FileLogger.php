@@ -1,6 +1,6 @@
 <?php
 
-namespace Ibid\Vault\Support;
+namespace Vaultenv\Vault\Support;
 
 use Psr\Log\AbstractLogger;
 use Stringable;

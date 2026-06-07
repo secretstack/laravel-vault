@@ -1,10 +1,10 @@
 <?php
 
-namespace Ibid\Vault\Tests\Unit\Auth;
+namespace Vaultenv\Vault\Tests\Unit\Auth;
 
-use Ibid\Vault\Auth\AppRoleAuth;
-use Ibid\Vault\Contracts\VaultClient;
-use Ibid\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\Auth\AppRoleAuth;
+use Vaultenv\Vault\Contracts\VaultClient;
+use Vaultenv\Vault\Exceptions\VaultException;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 

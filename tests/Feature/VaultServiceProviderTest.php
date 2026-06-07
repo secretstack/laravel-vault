@@ -1,17 +1,17 @@
 <?php
 
-namespace Ibid\Vault\Tests\Feature;
+namespace Vaultenv\Vault\Tests\Feature;
 
-use Ibid\Vault\Auth\AppRoleAuth;
-use Ibid\Vault\Cache\EncryptedFileCache;
-use Ibid\Vault\Contracts\AuthMethod;
-use Ibid\Vault\Contracts\SecretCache;
-use Ibid\Vault\Contracts\SecretProvider;
-use Ibid\Vault\Contracts\VaultClient;
-use Ibid\Vault\Http\GuzzleVaultClient;
-use Ibid\Vault\Provider\VaultSecretProvider;
-use Ibid\Vault\Secrets\SecretStore;
-use Ibid\Vault\Tests\TestCase;
+use Vaultenv\Vault\Auth\AppRoleAuth;
+use Vaultenv\Vault\Cache\EncryptedFileCache;
+use Vaultenv\Vault\Contracts\AuthMethod;
+use Vaultenv\Vault\Contracts\SecretCache;
+use Vaultenv\Vault\Contracts\SecretProvider;
+use Vaultenv\Vault\Contracts\VaultClient;
+use Vaultenv\Vault\Http\GuzzleVaultClient;
+use Vaultenv\Vault\Provider\VaultSecretProvider;
+use Vaultenv\Vault\Secrets\SecretStore;
+use Vaultenv\Vault\Tests\TestCase;
 
 class VaultServiceProviderTest extends TestCase
 {

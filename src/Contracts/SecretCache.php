@@ -1,6 +1,6 @@
 <?php
 
-namespace Ibid\Vault\Contracts;
+namespace Vaultenv\Vault\Contracts;
 
 /**
  * Persistence for fetched secrets across pod/worker boots.

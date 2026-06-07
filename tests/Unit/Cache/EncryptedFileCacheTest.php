@@ -1,8 +1,8 @@
 <?php
 
-namespace Ibid\Vault\Tests\Unit\Cache;
+namespace Vaultenv\Vault\Tests\Unit\Cache;
 
-use Ibid\Vault\Cache\EncryptedFileCache;
+use Vaultenv\Vault\Cache\EncryptedFileCache;
 use Illuminate\Encryption\Encrypter;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;

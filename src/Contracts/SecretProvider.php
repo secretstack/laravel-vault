@@ -1,8 +1,8 @@
 <?php
 
-namespace Ibid\Vault\Contracts;
+namespace Vaultenv\Vault\Contracts;
 
-use Ibid\Vault\Exceptions\SecretProviderException;
+use Vaultenv\Vault\Exceptions\SecretProviderException;
 
 /**
  * The source of a service's secrets. The only implementation in v1 is the

@@ -1,14 +1,14 @@
 <?php
 
-namespace Ibid\Vault\Tests\Unit\Http;
+namespace Vaultenv\Vault\Tests\Unit\Http;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
-use Ibid\Vault\Http\GuzzleVaultClient;
-use Ibid\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\Http\GuzzleVaultClient;
+use Vaultenv\Vault\Exceptions\VaultException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 

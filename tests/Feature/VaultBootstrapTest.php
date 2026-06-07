@@ -1,10 +1,10 @@
 <?php
 
-namespace Ibid\Vault\Tests\Feature;
+namespace Vaultenv\Vault\Tests\Feature;
 
-use Ibid\Vault\Bootstrap\VaultBootstrap;
-use Ibid\Vault\Exceptions\VaultException;
-use Ibid\Vault\Tests\TestCase;
+use Vaultenv\Vault\Bootstrap\VaultBootstrap;
+use Vaultenv\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\Tests\TestCase;
 
 class VaultBootstrapTest extends TestCase
 {

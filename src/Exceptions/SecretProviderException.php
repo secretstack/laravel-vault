@@ -1,6 +1,6 @@
 <?php
 
-namespace Ibid\Vault\Exceptions;
+namespace Vaultenv\Vault\Exceptions;
 
 use RuntimeException;
 

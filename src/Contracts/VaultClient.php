@@ -1,9 +1,9 @@
 <?php
 
-namespace Ibid\Vault\Contracts;
+namespace Vaultenv\Vault\Contracts;
 
-use Ibid\Vault\DTO\VaultSecret;
-use Ibid\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\DTO\VaultSecret;
+use Vaultenv\Vault\Exceptions\VaultException;
 
 /**
  * Low-level Vault HTTP transport. Engine-agnostic except for the KV-v2

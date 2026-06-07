@@ -1,8 +1,8 @@
 <?php
 
-namespace Ibid\Vault\Tests\Unit\Secrets;
+namespace Vaultenv\Vault\Tests\Unit\Secrets;
 
-use Ibid\Vault\Secrets\EnvInjector;
+use Vaultenv\Vault\Secrets\EnvInjector;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 

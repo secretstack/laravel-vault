@@ -1,8 +1,8 @@
 <?php
 
-namespace Ibid\Vault\Tests\Unit\DTO;
+namespace Vaultenv\Vault\Tests\Unit\DTO;
 
-use Ibid\Vault\DTO\VaultToken;
+use Vaultenv\Vault\DTO\VaultToken;
 use PHPUnit\Framework\TestCase;
 
 class VaultTokenTest extends TestCase

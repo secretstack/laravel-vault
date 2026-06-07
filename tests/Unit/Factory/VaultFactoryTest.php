@@ -1,10 +1,11 @@
 <?php
 
-namespace Ibid\Vault\Tests\Unit\Factory;
+namespace Vaultenv\Vault\Tests\Unit\Factory;
 
-use Ibid\Vault\Config\VaultConfig;
-use Ibid\Vault\Exceptions\VaultException;
-use Ibid\Vault\Factory\VaultFactory;
+use Vaultenv\Vault\Cache\NullCache;
+use Vaultenv\Vault\Config\VaultConfig;
+use Vaultenv\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\Factory\VaultFactory;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 
@@ -73,6 +74,15 @@ class VaultFactoryTest extends TestCase
         $this->expectExceptionMessage('APP_KEY');
 
         (new VaultFactory())->makeCache($cfg, new NullLogger());
+    }
+
+    public function test_make_cache_returns_null_cache_when_cache_is_disabled(): void
+    {
+        $cfg = $this->config(['cache' => ['enabled' => false, 'path' => $this->cacheDir, 'ttl' => 300, 'skew' => 30]]);
+
+        $cache = (new VaultFactory())->makeCache($cfg, new NullLogger());
+
+        $this->assertInstanceOf(NullCache::class, $cache);
     }
 
     public function test_make_store_refuses_to_assemble_an_unusable_config(): void

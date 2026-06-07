@@ -1,11 +1,11 @@
 <?php
 
-namespace Ibid\Vault\Tests\Feature;
+namespace Vaultenv\Vault\Tests\Feature;
 
-use Ibid\Vault\Contracts\SecretProvider;
-use Ibid\Vault\Exceptions\VaultException;
-use Ibid\Vault\Secrets\SecretStore;
-use Ibid\Vault\Tests\TestCase;
+use Vaultenv\Vault\Contracts\SecretProvider;
+use Vaultenv\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\Secrets\SecretStore;
+use Vaultenv\Vault\Tests\TestCase;
 use Mockery;
 
 class CheckCommandTest extends TestCase

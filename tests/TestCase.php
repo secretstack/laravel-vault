@@ -1,8 +1,8 @@
 <?php
 
-namespace Ibid\Vault\Tests;
+namespace Vaultenv\Vault\Tests;
 
-use Ibid\Vault\VaultServiceProvider;
+use Vaultenv\Vault\VaultServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra

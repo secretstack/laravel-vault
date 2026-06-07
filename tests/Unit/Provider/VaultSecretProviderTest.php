@@ -1,14 +1,15 @@
 <?php
 
-namespace Ibid\Vault\Tests\Unit\Provider;
+namespace Vaultenv\Vault\Tests\Unit\Provider;
 
-use Ibid\Vault\Contracts\AuthMethod;
-use Ibid\Vault\Contracts\SecretCache;
-use Ibid\Vault\Contracts\VaultClient;
-use Ibid\Vault\DTO\VaultSecret;
-use Ibid\Vault\DTO\VaultToken;
-use Ibid\Vault\Exceptions\VaultException;
-use Ibid\Vault\Provider\VaultSecretProvider;
+use Vaultenv\Vault\Cache\NullCache;
+use Vaultenv\Vault\Contracts\AuthMethod;
+use Vaultenv\Vault\Contracts\SecretCache;
+use Vaultenv\Vault\Contracts\VaultClient;
+use Vaultenv\Vault\DTO\VaultSecret;
+use Vaultenv\Vault\DTO\VaultToken;
+use Vaultenv\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\Provider\VaultSecretProvider;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
@@ -26,19 +27,17 @@ class VaultSecretProviderTest extends TestCase
         VaultClient $client,
         AuthMethod $auth,
         SecretCache $cache,
-        bool $cacheEnabled = true,
         int $cacheTtl = 300,
         int $cacheSkew = 30,
     ): VaultSecretProvider {
         return new VaultSecretProvider(
-            client:       $client,
-            auth:         $auth,
-            cache:        $cache,
-            secretPath:   'ibid/data/ims/dev/stockv2',
-            cacheTtl:     $cacheTtl,
-            cacheSkew:    $cacheSkew,
-            cacheEnabled: $cacheEnabled,
-            logger:       new NullLogger(),
+            client:     $client,
+            auth:       $auth,
+            cache:      $cache,
+            secretPath: 'ibid/data/ims/dev/stockv2',
+            cacheTtl:   $cacheTtl,
+            cacheSkew:  $cacheSkew,
+            logger:     new NullLogger(),
         );
     }
 
@@ -151,5 +150,23 @@ class VaultSecretProviderTest extends TestCase
         $this->expectException(VaultException::class);
 
         $this->makeProvider($client, $auth, $cache)->fetch();
+    }
+
+    public function test_null_cache_adapter_bypasses_persistence_transparently(): void
+    {
+        // When cache is disabled, the NullCache adapter absorbs get/put/getStale
+        // without branching in the Provider. Vault is always contacted; no stale
+        // grace is available (NullCache.getStale() → null → cold fail path).
+        $client = Mockery::mock(VaultClient::class);
+        $client->shouldReceive('readKvV2')->once()->andReturn(
+            new VaultSecret(['API_KEY' => 'live-value'], 1, time())
+        );
+
+        $auth = Mockery::mock(AuthMethod::class);
+        $auth->shouldReceive('authenticate')->once()->andReturn($this->token());
+
+        $result = $this->makeProvider($client, $auth, new NullCache(new NullLogger()))->fetch();
+
+        $this->assertSame(['API_KEY' => 'live-value'], $result);
     }
 }

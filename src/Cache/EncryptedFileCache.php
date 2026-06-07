@@ -1,8 +1,8 @@
 <?php
 
-namespace Ibid\Vault\Cache;
+namespace Vaultenv\Vault\Cache;
 
-use Ibid\Vault\Contracts\SecretCache;
+use Vaultenv\Vault\Contracts\SecretCache;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Psr\Log\LoggerInterface;

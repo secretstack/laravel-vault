@@ -1,9 +1,20 @@
 {
-    "name": "ibid/laravel-vault",
-    "description": "Centralized HashiCorp Vault secret management for IBID Laravel services.",
+    "name": "secretstack/laravel-vault",
+    "description": "Centralized HashiCorp Vault secret management for Laravel services.",
     "type": "library",
-    "license": "proprietary",
-    "keywords": ["laravel", "vault", "hashicorp", "secrets", "ibid"],
+    "license": "MIT",
+    "keywords": ["laravel", "vault", "hashicorp", "secrets"],
+    "homepage": "https://github.com/secretstack/laravel-vault",
+    "authors": [
+        {
+            "name": "budiharyonoo",
+            "email": "budiharyono4@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/secretstack/laravel-vault/issues",
+        "source": "https://github.com/secretstack/laravel-vault"
+    },
     "require": {
         "php": "^8.2",
         "ext-json": "*",
@@ -21,21 +32,21 @@
     },
     "autoload": {
         "psr-4": {
-            "Ibid\\Vault\\": "src/"
+            "Vaultenv\\Vault\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Ibid\\Vault\\Tests\\": "tests/"
+            "Vaultenv\\Vault\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Ibid\\Vault\\VaultServiceProvider"
+                "Vaultenv\\Vault\\VaultServiceProvider"
             ],
             "aliases": {
-                "Vault": "Ibid\\Vault\\Facades\\Vault"
+                "Vault": "Vaultenv\\Vault\\Facades\\Vault"
             }
         }
     },

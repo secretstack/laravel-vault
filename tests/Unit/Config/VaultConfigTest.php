@@ -1,9 +1,9 @@
 <?php
 
-namespace Ibid\Vault\Tests\Unit\Config;
+namespace Vaultenv\Vault\Tests\Unit\Config;
 
-use Ibid\Vault\Config\VaultConfig;
-use Ibid\Vault\Exceptions\VaultException;
+use Vaultenv\Vault\Config\VaultConfig;
+use Vaultenv\Vault\Exceptions\VaultException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

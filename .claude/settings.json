@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/ferrywibisono/podman-volumes/www/ibid/laravel-vault/.claude/hooks/test-on-edit.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/ferrywibisono/podman-volumes/www/ibid/laravel-vault/.claude/hooks/guard-vendor.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

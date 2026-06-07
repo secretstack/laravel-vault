@@ -1,8 +1,8 @@
 <?php
 
-namespace Ibid\Vault\Tests\Unit\Support;
+namespace Vaultenv\Vault\Tests\Unit\Support;
 
-use Ibid\Vault\Support\FileLogger;
+use Vaultenv\Vault\Support\FileLogger;
 use PHPUnit\Framework\TestCase;
 
 class FileLoggerTest extends TestCase
