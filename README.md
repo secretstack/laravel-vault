@@ -7,8 +7,8 @@
 
 <p>
   <a href="https://packagist.org/packages/secretstack/laravel-vault"><img src="https://img.shields.io/packagist/v/secretstack/laravel-vault.svg?style=flat-square" alt="Latest Version on Packagist"></a>
-  <img src="https://img.shields.io/badge/PHP-%5E8.3-777BB4.svg?style=flat-square" alt="PHP ^8.3">
-  <img src="https://img.shields.io/badge/Laravel-9%20%7C%2010%20%7C%2011%20%7C%2012%20%7C%2013-FF2D20.svg?style=flat-square" alt="Laravel 9 | 10 | 11 | 12 | 13">
+  <img src="https://img.shields.io/badge/PHP-%5E8.2-777BB4.svg?style=flat-square" alt="PHP ^8.2">
+  <img src="https://img.shields.io/badge/Laravel-10%20%7C%2011%20%7C%2012%20%7C%2013-FF2D20.svg?style=flat-square" alt="Laravel 10 | 11 | 12 | 13">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License MIT"></a>
 </p>
 
@@ -110,8 +110,8 @@ bootstrap/app.php → afterBootstrapping(LoadEnvironmentVariables)
 
 ## Requirements
 
-- **PHP** `^8.3`
-- **Laravel** `9`, `10`, `11`, `12`, or `13` — **Lumen is not supported** ([ADR-0001](docs/adr/0001-vault-package-targets-laravel-9-php-82.md))
+- **PHP** `^8.2`
+- **Laravel** `10`, `11`, `12`, or `13` — **Lumen is not supported** ([ADR-0001](docs/adr/0001-vault-package-targets-laravel-9-php-82.md))
 - A **HashiCorp Vault** server with a **KV-v2** secrets mount and **AppRole** auth enabled
 - `ext-json`
 
@@ -130,7 +130,7 @@ Wire the boot hook into `bootstrap/app.php`:
 php artisan vault:install
 ```
 
-`vault:install` is **idempotent** and patches the Laravel 9/10 skeleton automatically. For the
+`vault:install` is **idempotent** and patches the Laravel 10 skeleton automatically. For the
 **Laravel 11+ slim skeleton** (which has no `return $app;` line), the command cannot safely
 auto-edit the file — it prints manual instructions and the exact snippet to paste:
 
@@ -445,7 +445,7 @@ Deeper reading for maintainers:
 
 | ADR | Decision |
 |---|---|
-| [0001](docs/adr/0001-vault-package-targets-laravel-9-php-82.md) | Target Laravel 9+/PHP 8.2; no Lumen |
+| [0001](docs/adr/0001-vault-package-targets-laravel-9-php-82.md) | Target Laravel 9+/PHP 8.2; no Lumen (version targets superseded by ADR-0012 → ADR-0013) |
 | [0002](docs/adr/0002-hybrid-bootstrap-no-zero-touch.md) | Hybrid bootstrap; no zero-touch |
 | [0003](docs/adr/0003-fail-closed-by-default-in-production.md) | Fail-closed by default in production |
 | [0004](docs/adr/0004-stale-while-revalidate-grace-on-refresh.md) | Stale-while-revalidate grace on refresh |
@@ -456,6 +456,8 @@ Deeper reading for maintainers:
 | [0009](docs/adr/0009-secret-id-per-environment-not-per-service.md) | Secret id per-environment, not per-service |
 | [0010](docs/adr/0010-vault-check-gate-in-runsh.md) | `vault:check` gate, boot-equivalent |
 | [0011](docs/adr/0011-octane-worker-lifetime-no-reset-no-scrubbing.md) | Octane worker lifetime: no reset, no scrubbing |
+| [0012](docs/adr/0012-extend-laravel-support-12-13-php-83.md) | Laravel 12/13 support; PHP floor raised to 8.3 (floor superseded by ADR-0013) |
+| [0013](docs/adr/0013-lower-php-floor-to-8.2-drop-laravel-9.md) | Lower PHP floor to 8.2; drop Laravel 9; add CI matrix |
 
 ## Contributing
 

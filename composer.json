@@ -16,12 +16,12 @@
         "source": "https://github.com/secretstack/laravel-vault"
     },
     "require": {
-        "php": "^8.3",
+        "php": "^8.2",
         "ext-json": "*",
-        "illuminate/console": "^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0",
-        "illuminate/contracts": "^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0",
-        "illuminate/encryption": "^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0",
-        "illuminate/support": "^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "illuminate/console": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "illuminate/contracts": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "illuminate/encryption": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "illuminate/support": "^10.0 || ^11.0 || ^12.0 || ^13.0",
         "guzzlehttp/guzzle": "^7.0",
         "psr/log": "^3.0"
     },
@@ -51,7 +51,10 @@
         }
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "audit": {
+            "block-insecure": false
+        }
     },
     "minimum-stability": "stable",
     "prefer-stable": true

@@ -15,7 +15,7 @@ The *decisions* and their rationale live in Architecture Decision Records (ADR-0
 
 **Problem.** Every IBID service keeps its secrets as plaintext in a `.env` that is fetched from a config repo (`Ibid_Env`) and **baked into the image**. Goal: move secrets into Vault, fetch them at boot, and feed them to existing `env()`/`config()` consumers **transparently** — so a service adopts the package with near-zero code changes.
 
-**In scope (v1/v2):** Laravel 9/10/11/12/13 on PHP 8.3+; HashiCorp Vault KV-v2 via AppRole; transparent boot-time injection + a `Vault::get()` accessor; encrypted per-pod cache; Octane/Swoole/FrankenPHP/RoadRunner safety; fail-closed production posture with stale-while-revalidate grace.
+**In scope (v1/v2):** Laravel 10/11/12/13 on PHP 8.2+; HashiCorp Vault KV-v2 via AppRole; transparent boot-time injection + a `Vault::get()` accessor; encrypted per-pod cache; Octane/Swoole/FrankenPHP/RoadRunner safety; fail-closed production posture with stale-while-revalidate grace.
 
 **Out of scope (v1):** Lumen (ADR-0001); dynamic/leased DB credentials; a Vault Agent sidecar (roadmap); multi-provider machinery (ADR-0006); AKS Workload Identity auth (roadmap — kills secret-zero).
 
@@ -220,9 +220,9 @@ A Composer package is just a folder with a `composer.json` that declares a **PSR
   "type": "library",
   "license": "proprietary",
   "require": {
-    "php": "^8.3",
-    "illuminate/support": "^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0",
-    "illuminate/encryption": "^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0",
+    "php": "^8.2",
+    "illuminate/support": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+    "illuminate/encryption": "^10.0 || ^11.0 || ^12.0 || ^13.0",
     "guzzlehttp/guzzle": "^7.0",
     "psr/log": "^3.0"
   },
@@ -243,7 +243,7 @@ A Composer package is just a folder with a `composer.json` that declares a **PSR
 }
 ```
 
-- **`require`** uses OR-ranges (`^9.0 || ^10.0 || ^11.0 || ^12.0 || ^13.0`) so one package supports five Laravel majors. Depend on **`illuminate/*` components**, never `laravel/framework` — a package pulls only the pieces it needs.
+- **`require`** uses OR-ranges (`^10.0 || ^11.0 || ^12.0 || ^13.0`) so one package supports four Laravel majors. Depend on **`illuminate/*` components**, never `laravel/framework` — a package pulls only the pieces it needs.
 - **`extra.laravel.providers`** is Laravel package auto-discovery: the consumer gets the provider registered automatically on `composer require`. (This is the *late* registration — see §4 for why it isn't enough on its own.)
 - **`orchestra/testbench`** is how you boot a real Laravel kernel inside the package's own tests.
 
@@ -614,7 +614,7 @@ The model is **immutable-per-worker** (ADR-0004 context, Q5): resolve once at wo
 
 | ADR | Title |
 |---|---|
-| 0001 | Laravel 9+/PHP 8.2; no Lumen (superseded by ADR-0012) |
+| 0001 | Laravel 9+/PHP 8.2; no Lumen (version targets superseded by ADR-0012 → ADR-0013) |
 | 0002 | Hybrid bootstrap; no zero-touch |
 | 0003 | Fail-closed by default in production |
 | 0004 | Stale-while-revalidate grace on refresh |
@@ -625,4 +625,5 @@ The model is **immutable-per-worker** (ADR-0004 context, Q5): resolve once at wo
 | 0009 | SECRET_ID per-environment, not per-service |
 | 0010 | vault:check gate in run.sh, boot-equivalent |
 | 0011 | (see docs/adr/) |
-| 0012 | Laravel 12/13 support; raise PHP floor to 8.3 (supersedes ADR-0001 version targets) |
+| 0012 | Laravel 12/13 support; raise PHP floor to 8.3 (PHP floor superseded by ADR-0013) |
+| 0013 | Lower PHP floor to 8.2; drop Laravel 9; add CI matrix (supersedes ADR-0012 floor) |

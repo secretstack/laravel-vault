@@ -1,5 +1,10 @@
 # Extend supported Laravel versions to 12 and 13; raise PHP floor to 8.3
 
+> **Superseded (PHP floor + Laravel 9 decisions only):** [ADR-0013](0013-lower-php-floor-to-8.2-drop-laravel-9.md)
+> lowers the floor back to `^8.2` (the "misrepresentation" argument is rebutted there) and drops
+> the unsatisfiable Laravel 9 range. The Laravel 12/13 additions and all other rationale in this
+> ADR remain in force.
+
 **Context:** [ADR-0001](0001-vault-package-targets-laravel-9-php-82.md) set the initial targets at
 Laravel 9/10/11 on PHP 8.2+, and explicitly noted that "lowering the floor later is non-breaking;
 raising it is not — so we start conservative." The fleet has since moved onto Laravel 12/13, and

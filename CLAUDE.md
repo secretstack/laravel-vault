@@ -5,11 +5,11 @@ Private Laravel package: centralized HashiCorp Vault secret management for the f
 `env()`/`config()` consumers work **unchanged**.
 
 **Read before changing anything:** `DESIGN.md` (build blueprint), `docs/adr/` (decisions
-0001–0012), `CONTEXT.md` (glossary). Do not contradict an ADR without recording a
+0001–0013), `CONTEXT.md` (glossary). Do not contradict an ADR without recording a
 superseding one.
 
 ## Stack & compatibility
-- PHP `^8.3`; Laravel `9 | 10 | 11 | 12 | 13`. **No Lumen** (ADR-0001).
+- PHP `^8.2`; Laravel `10 | 11 | 12 | 13`. **No Lumen** (ADR-0001).
 - Depend on `illuminate/*` components, never `laravel/framework`.
 - Tests: Orchestra Testbench + PHPUnit.
 
