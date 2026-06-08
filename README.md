@@ -7,8 +7,8 @@
 
 <p>
   <a href="https://packagist.org/packages/secretstack/laravel-vault"><img src="https://img.shields.io/packagist/v/secretstack/laravel-vault.svg?style=flat-square" alt="Latest Version on Packagist"></a>
-  <img src="https://img.shields.io/badge/PHP-%5E8.2-777BB4.svg?style=flat-square" alt="PHP ^8.2">
-  <img src="https://img.shields.io/badge/Laravel-9%20%7C%2010%20%7C%2011-FF2D20.svg?style=flat-square" alt="Laravel 9 | 10 | 11">
+  <img src="https://img.shields.io/badge/PHP-%5E8.3-777BB4.svg?style=flat-square" alt="PHP ^8.3">
+  <img src="https://img.shields.io/badge/Laravel-9%20%7C%2010%20%7C%2011%20%7C%2012%20%7C%2013-FF2D20.svg?style=flat-square" alt="Laravel 9 | 10 | 11 | 12 | 13">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License MIT"></a>
 </p>
 
@@ -110,8 +110,8 @@ bootstrap/app.php → afterBootstrapping(LoadEnvironmentVariables)
 
 ## Requirements
 
-- **PHP** `^8.2`
-- **Laravel** `9`, `10`, or `11` — **Lumen is not supported** ([ADR-0001](docs/adr/0001-vault-package-targets-laravel-9-php-82.md))
+- **PHP** `^8.3`
+- **Laravel** `9`, `10`, `11`, `12`, or `13` — **Lumen is not supported** ([ADR-0001](docs/adr/0001-vault-package-targets-laravel-9-php-82.md))
 - A **HashiCorp Vault** server with a **KV-v2** secrets mount and **AppRole** auth enabled
 - `ext-json`
 
@@ -131,7 +131,7 @@ php artisan vault:install
 ```
 
 `vault:install` is **idempotent** and patches the Laravel 9/10 skeleton automatically. For the
-**Laravel 11 slim skeleton** (which has no `return $app;` line), the command cannot safely
+**Laravel 11+ slim skeleton** (which has no `return $app;` line), the command cannot safely
 auto-edit the file — it prints manual instructions and the exact snippet to paste:
 
 ```php

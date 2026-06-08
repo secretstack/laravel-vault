@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
  * Wires the facade-free bootstrap hook into a consumer's bootstrap/app.php
  * (the one mandatory code change, ADR-0002). Idempotent; prints the diff.
  *
- * Handles the Laravel 9/10 `return $app;` skeleton; for the Laravel 11 slim
+ * Handles the Laravel 9/10 `return $app;` skeleton; for the Laravel 11+ slim
  * skeleton it prints manual instructions rather than risk an unsafe edit.
  */
 final class InstallCommand extends Command
@@ -36,7 +36,7 @@ final class InstallCommand extends Command
         }
 
         if (! str_contains($contents, 'return $app;')) {
-            $this->warn('Could not find "return $app;" (Laravel 11 skeleton?). Add this manually to bootstrap/app.php:');
+            $this->warn('Could not find "return $app;" (Laravel 11+ slim skeleton). Add this manually to bootstrap/app.php:');
             $this->line($this->hookSnippet());
 
             return self::FAILURE;

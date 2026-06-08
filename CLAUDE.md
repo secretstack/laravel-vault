@@ -5,24 +5,24 @@ Private Laravel package: centralized HashiCorp Vault secret management for the f
 `env()`/`config()` consumers work **unchanged**.
 
 **Read before changing anything:** `DESIGN.md` (build blueprint), `docs/adr/` (decisions
-0001–0011), `CONTEXT.md` (glossary). Do not contradict an ADR without recording a
+0001–0012), `CONTEXT.md` (glossary). Do not contradict an ADR without recording a
 superseding one.
 
 ## Stack & compatibility
-- PHP `^8.2`; Laravel `9 | 10 | 11`. **No Lumen** (ADR-0001).
+- PHP `^8.3`; Laravel `9 | 10 | 11 | 12 | 13`. **No Lumen** (ADR-0001).
 - Depend on `illuminate/*` components, never `laravel/framework`.
 - Tests: Orchestra Testbench + PHPUnit.
 
-## Commands (run inside the `php8.2` container)
+## Commands (run inside the `php8.3` container)
 Host `~/podman-volumes/www/ibid/laravel-vault` ↔ container `/var/www/html/ibid/laravel-vault`.
 ```bash
 # Install deps
-docker exec -i -w /var/www/html/ibid/laravel-vault php8.2 composer install
+docker exec -i -w /var/www/html/ibid/laravel-vault php8.3 composer install
 # Run tests
-docker exec -i -w /var/www/html/ibid/laravel-vault php8.2 vendor/bin/phpunit
-docker exec -i -w /var/www/html/ibid/laravel-vault php8.2 vendor/bin/phpunit --testsuite=Unit
+docker exec -i -w /var/www/html/ibid/laravel-vault php8.3 vendor/bin/phpunit
+docker exec -i -w /var/www/html/ibid/laravel-vault php8.3 vendor/bin/phpunit --testsuite=Unit
 # Syntax check a file
-docker exec -i -w /var/www/html/ibid/laravel-vault php8.2 php -l <file>
+docker exec -i -w /var/www/html/ibid/laravel-vault php8.3 php -l <file>
 ```
 
 ## Workflow
