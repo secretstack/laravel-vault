@@ -6,6 +6,7 @@ use Vaultenv\Vault\Config\VaultConfig;
 use Vaultenv\Vault\Exceptions\VaultException;
 use Vaultenv\Vault\Factory\VaultFactory;
 use Vaultenv\Vault\Secrets\EnvInjector;
+use Vaultenv\Vault\Secrets\OverridePolicy;
 use Vaultenv\Vault\Support\FileLogger;
 use Illuminate\Contracts\Foundation\Application;
 
@@ -37,7 +38,7 @@ final class VaultBootstrap
         try {
             $logger  = new FileLogger($logFile);
             $secrets = (new VaultFactory())->makeStore($config, $logger)->all();
-            (new EnvInjector($logger))->inject($secrets);
+            (new EnvInjector($logger, OverridePolicy::fromConfig($config)))->inject($secrets);
         } catch (\Throwable $e) {
             self::emergencyLog($logFile, $e);
 

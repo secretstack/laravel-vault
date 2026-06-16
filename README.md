@@ -147,7 +147,10 @@ Publishing the config file is **optional** (it is auto-merged at runtime), but a
 php artisan vendor:publish --tag=vault-config
 ```
 
-> **Local development:** set `VAULT_ENABLED=false` to make the package a complete no-op.
+> **Local development:** set `VAULT_ENABLED=false` to make the package a complete no-op. To keep
+> live secrets from Vault but repoint a few keys at your machine (e.g. a sibling service URL during
+> cross-service work), use `VAULT_LOCAL_OVERRIDES` with `APP_ENV=local` instead — see
+> [Configuration](#configuration) and ADR-0014.
 
 ## Configuration
 
@@ -169,6 +172,7 @@ deterministic. The published file is [`config/vault.php`](config/vault.php).
 | `VAULT_HTTP_TIMEOUT` | `5` | Per-request HTTP timeout (seconds). |
 | `VAULT_HTTP_RETRIES` | `3` | Bounded retry attempts. |
 | `VAULT_TLS_VERIFY` | `true` | TLS certificate verification. **Never disable in production.** |
+| `VAULT_LOCAL_OVERRIDES` | _(empty)_ | Comma-separated keys whose **local `.env` value wins over Vault** — active **only when `APP_ENV=local`** (ADR-0014). For repointing a service URL at `localhost` during cross-service dev. Ignored (and logged) anywhere else. |
 | `APP_KEY` | _(Laravel's)_ | Encrypts the local cache. **Deny-listed** — never sourced from Vault. |
 
 A minimal `.env`:
