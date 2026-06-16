@@ -506,7 +506,7 @@ The model is **immutable-per-worker** (ADR-0004 context, Q5): resolve once at wo
 
 - One published `config/vault.php`; **every value via `env()` with a safe default** so `config:cache` is deterministic.
 - `.env` (baked, from `Ibid_Env`) carries only **bootstrap-tier** keys: non-secret `VAULT_*` config + `VAULT_ROLE_ID` + (for now, ADR-0008) `VAULT_SECRET_ID` + `APP_KEY` + `APP_ENV`/`APP_URL` for build-time `app:apim`.
-- Precedence: **Vault > .env** (ADR-0005). Runtime K8s env vars (where available) > baked `.env` automatically (phpdotenv doesn't overwrite set vars) — this is the zero-code exit path from ADR-0008.
+- Precedence: **Vault > .env** (ADR-0005), with one gated exception: keys listed in `VAULT_LOCAL_OVERRIDES` are kept from the local `.env` **only when `APP_ENV=local`** (ADR-0014) — for local cross-service dev; inert on every deployed pod. Runtime K8s env vars (where available) > baked `.env` automatically (phpdotenv doesn't overwrite set vars) — this is the zero-code exit path from ADR-0008.
 - Namespaces: `VAULT_NAMESPACE` supported (Vault Enterprise); empty by default.
 
 ---
@@ -627,3 +627,4 @@ The model is **immutable-per-worker** (ADR-0004 context, Q5): resolve once at wo
 | 0011 | (see docs/adr/) |
 | 0012 | Laravel 12/13 support; raise PHP floor to 8.3 (PHP floor superseded by ADR-0013) |
 | 0013 | Lower PHP floor to 8.2; drop Laravel 9; add CI matrix (supersedes ADR-0012 floor) |
+| 0014 | Local override allow-list (`VAULT_LOCAL_OVERRIDES`), gated to `APP_ENV=local` (amends ADR-0005) |

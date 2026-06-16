@@ -8,6 +8,7 @@ use Vaultenv\Vault\Contracts\SecretCache;
 use Vaultenv\Vault\Contracts\SecretProvider;
 use Vaultenv\Vault\Contracts\VaultClient;
 use Vaultenv\Vault\Factory\VaultFactory;
+use Vaultenv\Vault\Secrets\OverridePolicy;
 use Vaultenv\Vault\Secrets\SecretStore;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
@@ -43,6 +44,7 @@ final class VaultServiceProvider extends ServiceProvider
         $this->app->singleton(VaultConfig::class, fn ($app): VaultConfig => VaultConfig::fromArray(
             $app['config']->get('vault'),
             (string) $app['config']->get('app.key'),
+            (string) $app['config']->get('app.env'),
         ));
 
         $this->app->singleton(VaultFactory::class, fn (): VaultFactory => new VaultFactory());
@@ -98,8 +100,17 @@ final class VaultServiceProvider extends ServiceProvider
 
         try {
             $secrets = $this->app->make(SecretStore::class)->all();
+            $policy  = OverridePolicy::fromConfig($this->app->make(VaultConfig::class));
 
             foreach ($keyMap as $secretKey => $configPath) {
+                // Honor the local override (ADR-0014): if the dev is keeping this
+                // key's .env value, don't push the Vault value back into config()
+                // here — otherwise the override would work everywhere except for
+                // keys that happen to be in key_map.
+                if ($policy->shouldKeepLocal($secretKey)) {
+                    continue;
+                }
+
                 if (array_key_exists($secretKey, $secrets)) {
                     $this->app['config']->set($configPath, $secrets[$secretKey]);
                 }

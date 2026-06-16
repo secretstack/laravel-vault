@@ -16,6 +16,21 @@ return [
 
     'secret_path' => env('VAULT_SECRET_PATH', ''),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Local Override Allow-list (ADR-0014)
+    |--------------------------------------------------------------------------
+    | Comma-separated keys whose value in the local .env wins over Vault — for
+    | repointing a service URL at localhost during cross-service development.
+    | Active ONLY when APP_ENV=local; ignored (and logged) anywhere else, so it
+    | can never weaken Vault-wins precedence (ADR-0005) on a deployed pod.
+    |   e.g. VAULT_LOCAL_OVERRIDES="STOCKV2_SERVICE_URL,PAYMENT_URL"
+    */
+    'local_overrides' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('VAULT_LOCAL_OVERRIDES', '')),
+    ))),
+
     // Fail-closed by default in production (ADR-0003). Set true only in local/dev.
     'fail_open' => env('VAULT_FAIL_OPEN', false),
 

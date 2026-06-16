@@ -16,6 +16,10 @@ use Illuminate\Support\Env;
  */
 final class VaultConfig
 {
+    /**
+     * @param list<string> $localOverrides keys whose local .env value wins over
+     *                                      Vault when APP_ENV === 'local' (ADR-0014)
+     */
     public function __construct(
         public readonly bool $enabled,
         public readonly string $address,
@@ -35,6 +39,8 @@ final class VaultConfig
         public readonly int $httpMaxDelayMs,
         public readonly bool $tlsVerify,
         public readonly string $appKey,
+        public readonly string $appEnv = 'production',
+        public readonly array $localOverrides = [],
     ) {
     }
 
@@ -65,6 +71,8 @@ final class VaultConfig
             httpMaxDelayMs:   5000,
             tlsVerify:        filter_var(Env::get('VAULT_TLS_VERIFY', 'true'), FILTER_VALIDATE_BOOLEAN),
             appKey:           (string) Env::get('APP_KEY', ''),
+            appEnv:           (string) Env::get('APP_ENV', 'production'),
+            localOverrides:   self::normalizeOverrides(Env::get('VAULT_LOCAL_OVERRIDES', '')),
         );
     }
 
@@ -74,7 +82,7 @@ final class VaultConfig
      *
      * @param array<string,mixed> $config
      */
-    public static function fromArray(array $config, string $appKey): self
+    public static function fromArray(array $config, string $appKey, string $appEnv = 'production'): self
     {
         $auth  = $config['auth'] ?? [];
         $cache = $config['cache'] ?? [];
@@ -99,7 +107,29 @@ final class VaultConfig
             httpMaxDelayMs:   (int) ($http['max_delay'] ?? 5000),
             tlsVerify:        (bool) ($http['verify'] ?? true),
             appKey:           $appKey,
+            appEnv:           $appEnv,
+            localOverrides:   self::normalizeOverrides($config['local_overrides'] ?? []),
         );
+    }
+
+    /**
+     * Normalize VAULT_LOCAL_OVERRIDES into a clean list. Accepts a CSV string
+     * (the boot/env path) or an already-split array (the config('vault') path);
+     * trims each entry and drops empties so a trailing comma or stray space
+     * never produces a phantom override key.
+     *
+     * @param string|array<int|string,mixed> $raw
+     *
+     * @return list<string>
+     */
+    private static function normalizeOverrides(string|array $raw): array
+    {
+        $items = is_string($raw) ? explode(',', $raw) : $raw;
+
+        return array_values(array_filter(array_map(
+            static fn ($k): string => trim((string) $k),
+            $items,
+        ), static fn (string $k): bool => $k !== ''));
     }
 
     /**

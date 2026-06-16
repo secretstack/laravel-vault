@@ -13,7 +13,7 @@ class VaultConfigTest extends TestCase
         'VAULT_ENABLED', 'VAULT_ADDR', 'VAULT_NAMESPACE', 'VAULT_AUTH_MOUNT',
         'VAULT_ROLE_ID', 'VAULT_SECRET_ID', 'VAULT_SECRET_PATH', 'VAULT_FAIL_OPEN',
         'VAULT_CACHE_ENABLED', 'VAULT_CACHE_TTL', 'VAULT_HTTP_TIMEOUT', 'VAULT_HTTP_RETRIES',
-        'VAULT_TLS_VERIFY', 'APP_KEY',
+        'VAULT_TLS_VERIFY', 'APP_KEY', 'APP_ENV', 'VAULT_LOCAL_OVERRIDES',
     ];
 
     protected function tearDown(): void
@@ -100,6 +100,43 @@ class VaultConfigTest extends TestCase
         $this->assertSame(500, $cfg->httpRetryDelayMs);  // not env-driven; constant default
         $this->assertSame(5000, $cfg->httpMaxDelayMs);   // not env-driven; constant default
         $this->assertSame('base64:ZZZZ', $cfg->appKey);
+    }
+
+    public function test_from_env_reads_app_env_and_local_overrides(): void
+    {
+        $_SERVER['APP_ENV']               = 'local';
+        $_SERVER['VAULT_LOCAL_OVERRIDES'] = 'STOCKV2_SERVICE_URL, PAYMENT_URL ,'; // spaces + trailing empty
+
+        $cfg = VaultConfig::fromEnv(cachePath: '/var/cache/vault');
+
+        $this->assertSame('local', $cfg->appEnv);
+        $this->assertSame(['STOCKV2_SERVICE_URL', 'PAYMENT_URL'], $cfg->localOverrides, 'trimmed, empties dropped');
+    }
+
+    public function test_from_env_defaults_app_env_to_production_when_absent(): void
+    {
+        $cfg = VaultConfig::fromEnv(cachePath: '/var/cache/vault');
+
+        $this->assertSame('production', $cfg->appEnv, 'fail-safe: unset APP_ENV is treated as non-local');
+        $this->assertSame([], $cfg->localOverrides);
+    }
+
+    public function test_from_array_reads_app_env_and_local_overrides(): void
+    {
+        $config = array_replace($this->configArray(), ['local_overrides' => ['A', 'B']]);
+
+        $cfg = VaultConfig::fromArray($config, appKey: 'base64:AAAA', appEnv: 'local');
+
+        $this->assertSame('local', $cfg->appEnv);
+        $this->assertSame(['A', 'B'], $cfg->localOverrides);
+    }
+
+    public function test_from_array_defaults_app_env_to_production(): void
+    {
+        $cfg = VaultConfig::fromArray($this->configArray(), appKey: 'base64:AAAA');
+
+        $this->assertSame('production', $cfg->appEnv);
+        $this->assertSame([], $cfg->localOverrides);
     }
 
     public function test_assert_usable_passes_when_required_fields_present(): void
