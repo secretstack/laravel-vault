@@ -121,7 +121,7 @@ The package depends on individual `illuminate/*` components (never `laravel/fram
 ## Installation
 
 ```bash
-composer require secretstack/laravel-vault:^1.0
+composer require secretstack/laravel-vault
 ```
 
 Wire the boot hook into `bootstrap/app.php`:
