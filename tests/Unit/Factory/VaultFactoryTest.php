@@ -95,4 +95,23 @@ class VaultFactoryTest extends TestCase
 
         (new VaultFactory())->makeStore($cfg, new NullLogger());
     }
+
+    public function test_make_provider_wires_the_defaults_path_from_config(): void
+    {
+        $factory = new VaultFactory();
+        $logger  = new NullLogger();
+        $cfg     = $this->config(['defaults_path' => 'ibid/data/ims/dev/_global']);
+
+        $provider = $factory->makeProvider(
+            $factory->makeClient($cfg, $logger),
+            $factory->makeAuth($cfg),
+            $factory->makeCache($cfg, $logger),
+            $cfg,
+            $logger,
+        );
+
+        $prop = new \ReflectionProperty($provider, 'defaultsPath');
+
+        $this->assertSame('ibid/data/ims/dev/_global', $prop->getValue($provider));
+    }
 }

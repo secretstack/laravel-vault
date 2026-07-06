@@ -166,6 +166,7 @@ deterministic. The published file is [`config/vault.php`](config/vault.php).
 | `VAULT_ROLE_ID` | _(empty)_ | AppRole role id. |
 | `VAULT_SECRET_ID` | _(empty)_ | AppRole secret id — your **bootstrap credential** (see [Security](#security-model)). |
 | `VAULT_SECRET_PATH` | _(empty)_ | KV-v2 path, e.g. `secret/data/my-app/production`. |
+| `VAULT_DEFAULTS_PATH` | _(empty)_ | Optional second KV-v2 path holding **per-environment shared defaults** (ADR-0015), e.g. `secret/data/ims/dev/_defaults`. Fetched and merged atomically with the service path — a service key shadows a defaults key. Empty = off. Configured-but-missing path is a **hard boot error**. |
 | `VAULT_FAIL_OPEN` | `false` | Keep `false` (fail-closed) in production. `true` is **dev-only** and falls back to cache. |
 | `VAULT_CACHE_ENABLED` | `true` | Enable the encrypted file cache. |
 | `VAULT_CACHE_TTL` | `300` | Cache trust window, in seconds. |
