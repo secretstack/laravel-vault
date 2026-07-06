@@ -20,6 +20,10 @@ _Avoid_: "config override" (that's the narrower `key_map` backstop, not the prim
 A gated, explicit exception to **Vault-wins** precedence: for keys named in `VAULT_LOCAL_OVERRIDES`, the local `.env` value wins over Vault — but **only** when `APP_ENV=local` (ADR-0014). For repointing a service URL at `localhost` during cross-service dev without touching shared Vault values. The decision lives in one `OverridePolicy` consulted by both the **Loader** (`EnvInjector`) and the `key_map` backstop, so precedence cannot drift between boot phases. Nothing is exported to disk; the mechanism only *declines to overwrite*.
 _Avoid_: conflating with **transparent injection** (the default mechanism) or "config override" (the `key_map` backstop) — local override is the inversion of precedence, not the injection itself.
 
+**Environment defaults** (`VAULT_DEFAULTS_PATH`):
+An optional second Vault path holding keys every service in an environment receives *unless its own service path defines the same key* — the service path always wins. Per-environment (e.g. `ims/dev/_defaults`, `ims/prod/_defaults`), never fleet-wide. Merged with the service path into one atomic payload before caching and injection; a configured-but-missing defaults path is a hard error, not an empty set. Precedence, lowest to highest: environment defaults → service path → **local override** (gated), with **bootstrap-tier keys** denied from both paths.
+_Avoid_: "global settings" — these are per-environment and overridable; "global" implies fleet-wide and authoritative, which is exactly what they are not.
+
 **The Loader**:
 The facade-free bootstrap component (`VaultBootstrap::inject($app)`) invoked from a single `afterBootstrapping(LoadEnvironmentVariables)` line in a consumer's `bootstrap/app.php`. Runs before facades exist.
 
@@ -53,6 +57,7 @@ Boot behavior when secrets cannot be obtained. **Fail-closed** (production defau
 ## Relationships
 
 - A **Service** has one Vault **path** per **environment**; one **secret-zero** is shared by all services *within* an environment (not per-service).
+- An **environment** may additionally have one **environment defaults** path, read by every service in that environment and shadowed key-by-key by each service's own path.
 - The **Loader** and the `VaultServiceProvider` each build a **Resolved config** and pass it to **The Factory**, which assembles the graph the **Provider** drives — so wiring knowledge lives in one place across both boot phases.
 - The **Loader** calls the **Provider**, which returns secrets that are then **transparently injected**.
 - **Cold start** → fail-closed; **Refresh** failure → **grace**. The **Gate** enforces the same distinction at startup.
