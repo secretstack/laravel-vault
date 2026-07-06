@@ -18,6 +18,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Environment Defaults Path (ADR-0015)
+    |--------------------------------------------------------------------------
+    | Optional per-environment shared path merged beneath the service path —
+    | a key in secret_path shadows the same key here. Empty = feature off.
+    | A configured-but-missing path (404) is a hard error, never empty.
+    |   e.g. VAULT_DEFAULTS_PATH="ibid/data/ims/dev/_global"
+    */
+    'defaults_path' => env('VAULT_DEFAULTS_PATH', ''),
+
+    /*
+    |--------------------------------------------------------------------------
     | Local Override Allow-list (ADR-0014)
     |--------------------------------------------------------------------------
     | Comma-separated keys whose value in the local .env wins over Vault — for

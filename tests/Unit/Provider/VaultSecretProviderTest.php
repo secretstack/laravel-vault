@@ -29,15 +29,17 @@ class VaultSecretProviderTest extends TestCase
         SecretCache $cache,
         int $cacheTtl = 300,
         int $cacheSkew = 30,
+        string $defaultsPath = '',
     ): VaultSecretProvider {
         return new VaultSecretProvider(
-            client:     $client,
-            auth:       $auth,
-            cache:      $cache,
-            secretPath: 'ibid/data/ims/dev/stockv2',
-            cacheTtl:   $cacheTtl,
-            cacheSkew:  $cacheSkew,
-            logger:     new NullLogger(),
+            client:       $client,
+            auth:         $auth,
+            cache:        $cache,
+            secretPath:   'ibid/data/ims/dev/stockv2',
+            cacheTtl:     $cacheTtl,
+            cacheSkew:    $cacheSkew,
+            logger:       new NullLogger(),
+            defaultsPath: $defaultsPath,
         );
     }
 
@@ -150,6 +152,91 @@ class VaultSecretProviderTest extends TestCase
         $this->expectException(VaultException::class);
 
         $this->makeProvider($client, $auth, $cache)->fetch();
+    }
+
+    public function test_merges_defaults_path_with_service_key_winning(): void
+    {
+        // ADR-0015: environment defaults -> service path, service key shadows.
+        $client = Mockery::mock(VaultClient::class);
+        $client->shouldReceive('readKvV2')
+            ->once()
+            ->with('ibid/data/ims/dev/_global', 's.tok')
+            ->andReturn($this->secret(['APP_TIMEZONE' => 'Asia/Jakarta', 'DB_PASSWORD' => 'defaults-value']));
+        $client->shouldReceive('readKvV2')
+            ->once()
+            ->with('ibid/data/ims/dev/stockv2', 's.tok')
+            ->andReturn($this->secret(['DB_PASSWORD' => 'service-value']));
+
+        $auth = Mockery::mock(AuthMethod::class);
+        $auth->shouldReceive('authenticate')->once()->andReturn($this->token());
+
+        $captured = null;
+        $cache = Mockery::mock(SecretCache::class);
+        $cache->shouldReceive('get')->once()->andReturn(null);
+        $cache->shouldReceive('put')->once()->withArgs(function (array $secrets) use (&$captured) {
+            $captured = $secrets;
+
+            return true;
+        });
+
+        $provider = $this->makeProvider($client, $auth, $cache, defaultsPath: 'ibid/data/ims/dev/_global');
+        $merged   = $provider->fetch();
+
+        $this->assertSame(
+            ['APP_TIMEZONE' => 'Asia/Jakarta', 'DB_PASSWORD' => 'service-value'],
+            $merged,
+            'service key must shadow the defaults key'
+        );
+        $this->assertSame($merged, $captured, 'cache must hold the single merged payload (ADR-0015)');
+    }
+
+    public function test_defaults_path_fetch_failure_propagates_when_nothing_cached(): void
+    {
+        // Configured-but-missing defaults path (404) is a hard error (ADR-0015 §4).
+        $client = Mockery::mock(VaultClient::class);
+        $client->shouldReceive('readKvV2')
+            ->once()
+            ->with('ibid/data/ims/dev/_global', 's.tok')
+            ->andThrow(new VaultException('HTTP 404 reading path', 404));
+
+        $auth = Mockery::mock(AuthMethod::class);
+        $auth->shouldReceive('authenticate')->once()->andReturn($this->token());
+
+        $cache = Mockery::mock(SecretCache::class);
+        $cache->shouldReceive('get')->once()->andReturn(null);
+        $cache->shouldReceive('getStale')->once()->andReturn(null);
+
+        $this->expectException(VaultException::class);
+
+        $this->makeProvider($client, $auth, $cache, defaultsPath: 'ibid/data/ims/dev/_global')->fetch();
+    }
+
+    public function test_defaults_path_fetch_failure_serves_merged_stale_cache(): void
+    {
+        // Refresh failure with a usable cache = grace on the merged last-known-good (ADR-0004/0015).
+        $client = Mockery::mock(VaultClient::class);
+        $client->shouldReceive('readKvV2')
+            ->once()
+            ->with('ibid/data/ims/dev/_global', 's.tok')
+            ->andThrow(new VaultException('connection refused'));
+
+        $auth = Mockery::mock(AuthMethod::class);
+        $auth->shouldReceive('authenticate')->once()->andReturn($this->token());
+
+        $cache = Mockery::mock(SecretCache::class);
+        $cache->shouldReceive('get')->once()->andReturn(null);
+        $cache->shouldReceive('getStale')->once()->andReturn([
+            'secrets'    => ['APP_TIMEZONE' => 'Asia/Jakarta', 'DB_PASSWORD' => 'service-value'],
+            'fetched_at' => time() - 99999,
+            'expires_at' => time() - 100,
+        ]);
+
+        $provider = $this->makeProvider($client, $auth, $cache, defaultsPath: 'ibid/data/ims/dev/_global');
+
+        $this->assertSame(
+            ['APP_TIMEZONE' => 'Asia/Jakarta', 'DB_PASSWORD' => 'service-value'],
+            $provider->fetch()
+        );
     }
 
     public function test_null_cache_adapter_bypasses_persistence_transparently(): void

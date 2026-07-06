@@ -38,6 +38,7 @@ final class CheckCommand extends Command
         $this->info('─── HashiCorp Vault Health Check ───');
         $this->line('Address  : ' . $cfg['address']);
         $this->line('Path     : ' . $cfg['secret_path']);
+        $this->line('Defaults : ' . (($cfg['defaults_path'] ?? '') !== '' ? $cfg['defaults_path'] : '(none)'));
         $this->line('Mount    : ' . $cfg['auth']['mount']);
         $this->line('Fail-open: ' . ($cfg['fail_open'] ? 'YES (dev)' : 'NO (fail-closed)'));
         $this->newLine();

@@ -14,6 +14,7 @@ class VaultConfigTest extends TestCase
         'VAULT_ROLE_ID', 'VAULT_SECRET_ID', 'VAULT_SECRET_PATH', 'VAULT_FAIL_OPEN',
         'VAULT_CACHE_ENABLED', 'VAULT_CACHE_TTL', 'VAULT_HTTP_TIMEOUT', 'VAULT_HTTP_RETRIES',
         'VAULT_TLS_VERIFY', 'APP_KEY', 'APP_ENV', 'VAULT_LOCAL_OVERRIDES',
+        'VAULT_DEFAULTS_PATH',
     ];
 
     protected function tearDown(): void
@@ -137,6 +138,30 @@ class VaultConfigTest extends TestCase
 
         $this->assertSame('production', $cfg->appEnv);
         $this->assertSame([], $cfg->localOverrides);
+    }
+
+    public function test_from_env_reads_defaults_path(): void
+    {
+        $_SERVER['VAULT_DEFAULTS_PATH'] = 'ibid/data/ims/dev/_global';
+
+        $cfg = VaultConfig::fromEnv(cachePath: '/var/cache/vault');
+
+        $this->assertSame('ibid/data/ims/dev/_global', $cfg->defaultsPath);
+    }
+
+    public function test_from_array_reads_defaults_path(): void
+    {
+        $config = array_replace($this->configArray(), ['defaults_path' => 'ibid/data/ims/dev/_global']);
+
+        $cfg = VaultConfig::fromArray($config, appKey: 'base64:AAAA');
+
+        $this->assertSame('ibid/data/ims/dev/_global', $cfg->defaultsPath);
+    }
+
+    public function test_defaults_path_defaults_to_empty_string(): void
+    {
+        $this->assertSame('', VaultConfig::fromEnv(cachePath: '/var/cache/vault')->defaultsPath);
+        $this->assertSame('', VaultConfig::fromArray($this->configArray(), appKey: 'base64:AAAA')->defaultsPath);
     }
 
     public function test_assert_usable_passes_when_required_fields_present(): void

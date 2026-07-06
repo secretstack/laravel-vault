@@ -73,13 +73,14 @@ final class VaultFactory
         $c->assertUsable();
 
         return new VaultSecretProvider(
-            client:     $client,
-            auth:       $auth,
-            cache:      $cache,
-            secretPath: $c->secretPath,
-            cacheTtl:   $c->cacheTtl,
-            cacheSkew:  $c->cacheSkew,
-            logger:     $logger,
+            client:       $client,
+            auth:         $auth,
+            cache:        $cache,
+            secretPath:   $c->secretPath,
+            cacheTtl:     $c->cacheTtl,
+            cacheSkew:    $c->cacheSkew,
+            logger:       $logger,
+            defaultsPath: $c->defaultsPath,
         );
     }
 

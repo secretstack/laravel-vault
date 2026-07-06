@@ -41,6 +41,7 @@ final class VaultConfig
         public readonly string $appKey,
         public readonly string $appEnv = 'production',
         public readonly array $localOverrides = [],
+        public readonly string $defaultsPath = '',
     ) {
     }
 
@@ -73,6 +74,7 @@ final class VaultConfig
             appKey:           (string) Env::get('APP_KEY', ''),
             appEnv:           (string) Env::get('APP_ENV', 'production'),
             localOverrides:   self::normalizeOverrides(Env::get('VAULT_LOCAL_OVERRIDES', '')),
+            defaultsPath:     (string) Env::get('VAULT_DEFAULTS_PATH', ''),
         );
     }
 
@@ -109,6 +111,7 @@ final class VaultConfig
             appKey:           $appKey,
             appEnv:           $appEnv,
             localOverrides:   self::normalizeOverrides($config['local_overrides'] ?? []),
+            defaultsPath:     (string) ($config['defaults_path'] ?? ''),
         );
     }
 

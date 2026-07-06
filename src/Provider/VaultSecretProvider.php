@@ -16,6 +16,11 @@ use Psr\Log\LoggerInterface;
  * (even expired) cache, serves last-known-good (grace, ADR-0004); with nothing
  * cached, the failure propagates (cold start, fail-closed at the loader).
  *
+ * When a defaults path is configured (ADR-0015), both paths are fetched and
+ * merged atomically — service key shadows defaults key — and the cache holds
+ * the single merged payload. Either fetch failing means the fetch failed; a
+ * 404 on the configured defaults path is a hard error, never treated as empty.
+ *
  * Returns a flat array<string,string>; the lease, KV version, and auth method
  * never leak through the SecretProvider contract (ADR-0006).
  */
@@ -29,6 +34,7 @@ final class VaultSecretProvider implements SecretProvider
         private readonly int $cacheTtl,
         private readonly int $cacheSkew,
         private readonly LoggerInterface $logger,
+        private readonly string $defaultsPath = '',
     ) {
     }
 
@@ -42,19 +48,27 @@ final class VaultSecretProvider implements SecretProvider
         }
 
         try {
-            $token  = $this->auth->authenticate($this->client);
+            $token = $this->auth->authenticate($this->client);
+
+            $defaults = $this->defaultsPath !== ''
+                ? $this->client->readKvV2($this->defaultsPath, $token->clientToken)->data
+                : [];
+
             $secret = $this->client->readKvV2($this->secretPath, $token->clientToken);
+            $merged = array_merge($defaults, $secret->data);
 
             $ttl = max(1, min($token->leaseDuration - $this->cacheSkew, $this->cacheTtl));
-            $this->cache->put($secret->data, $ttl);
+            $this->cache->put($merged, $ttl);
 
             $this->logger->info('vault.fetch.ok', [
-                'path'    => $this->secretPath,
-                'version' => $secret->version,
-                'keys'    => array_keys($secret->data),
+                'path'          => $this->secretPath,
+                'defaults_path' => $this->defaultsPath,
+                'version'       => $secret->version,
+                'keys'          => array_keys($merged),
+                'shadowed_keys' => array_keys(array_intersect_key($defaults, $secret->data)),
             ]);
 
-            return $secret->data;
+            return $merged;
         } catch (VaultException $e) {
             // Grace: serve last-known-good if we have any (ADR-0004).
             $stale = $this->cache->getStale();

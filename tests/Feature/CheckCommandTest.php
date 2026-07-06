@@ -45,6 +45,30 @@ class CheckCommandTest extends TestCase
             ->assertExitCode(0);
     }
 
+    public function test_plain_mode_displays_defaults_path_when_configured(): void
+    {
+        config(['vault.defaults_path' => 'ibid/data/ims/dev/_global']);
+
+        $provider = Mockery::mock(SecretProvider::class);
+        $provider->shouldReceive('fetch')->andReturn(['A' => '1']);
+        $this->app->instance(SecretStore::class, new SecretStore($provider));
+
+        $this->artisan('vault:check')
+            ->expectsOutputToContain('Defaults : ibid/data/ims/dev/_global')
+            ->assertExitCode(0);
+    }
+
+    public function test_plain_mode_shows_defaults_disabled_when_unset(): void
+    {
+        $provider = Mockery::mock(SecretProvider::class);
+        $provider->shouldReceive('fetch')->andReturn(['A' => '1']);
+        $this->app->instance(SecretStore::class, new SecretStore($provider));
+
+        $this->artisan('vault:check')
+            ->expectsOutputToContain('Defaults : (none)')
+            ->assertExitCode(0);
+    }
+
     public function test_plain_mode_fails_when_secrets_unobtainable(): void
     {
         $provider = Mockery::mock(SecretProvider::class);
